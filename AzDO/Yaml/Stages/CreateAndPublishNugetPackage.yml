@@ -25,12 +25,12 @@ stages:
       submodules: true
       persistCredentials: true
 
-    - template: Compute_GitVersion.yml
+    - template: ..\Steps\Compute_GitVersion.yml
       parameters:
         gitVersionConfigFilePath: "GitVersion.yml"
         rootBranchName: ${{ parameters.rootBranchName }}
    
-    - template: BuildAndTest.yml
+    - template: ..\Steps\BuildAndTest.yml
       parameters:
         azureArtifactsFeed: ${{ parameters.azureArtifactsFeed }}
         buildConfiguration: ${{ parameters.buildConfiguration }}
