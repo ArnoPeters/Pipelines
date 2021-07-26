@@ -25,7 +25,7 @@ stages:
       submodules: true
       persistCredentials: true
 
-    - template: ..\Steps\Compute_GitVersion.yml
+    - template: ..\Steps\ComputeGitVersion.yml
       parameters:
         gitVersionConfigFilePath: "GitVersion.yml"
         rootBranchName: ${{ parameters.rootBranchName }}
