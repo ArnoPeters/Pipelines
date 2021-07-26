@@ -1,0 +1,58 @@
+parameters:
+- name: azureArtifactsFeed
+- name: 'pool'
+  type: object
+  default: {}
+- name: 'buildConfiguration'
+  default: "Release"
+  type: string
+- name: 'rootBranchName'
+  type: string
+- name: 'runSettingsFile'
+  type: string
+
+stages:
+- stage: Build
+  displayName: Build and Publish nuget package 
+  pool: ${{ parameters.pool }}
+  jobs:
+  - job: Build
+    workspace:
+      clean: all
+    steps:
+    - checkout: self
+      displayName: "Checkout repository including submodules"
+      submodules: true
+      persistCredentials: true
+
+    - template: Compute_GitVersion.yml
+      parameters:
+        gitVersionConfigFilePath: "GitVersion.yml"
+        rootBranchName: ${{ parameters.rootBranchName }}
+   
+    - template: BuildAndTest.yml
+      parameters:
+        azureArtifactsFeed: ${{ parameters.azureArtifactsFeed }}
+        buildConfiguration: ${{ parameters.buildConfiguration }}
+        runSettingsFile: ${{ parameters.runSettingsFile }}
+
+    - task: DotNetCoreCLI@2
+      displayName: 'NuGet - Push package(s) to [${{ parameters.azureArtifactsFeed }}]'
+      inputs:
+        command: push
+        packagesToPush: '$(System.DefaultWorkingDirectory)/src/**/*.nupkg'
+        publishVstsFeed: '${{ parameters.azureArtifactsFeed }}'
+    
+    - task: ATP.ATP-GitTag.GitTag.GitTag@6
+      displayName: 'Versioning - Tag commit on release'
+      inputs:
+        tag: 'v$(Gitversion.MajorMinorPatch)'
+        tagMessage: 'Release of Nuget package'
+      condition: eq('${{ variables['Build.SourceBranch'] }}', '${{ parameters.rootBranchName }}')
+
+    - task: PublishSymbols@2
+      displayName: 'Nuget - Publish symbols to artifacts'
+      inputs:
+        SearchPattern: '**/bin/**/*.pdb'
+        IndexSources: false
+        SymbolServerType: 'TeamServices'

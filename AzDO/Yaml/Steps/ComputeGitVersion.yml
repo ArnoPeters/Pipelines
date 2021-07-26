@@ -1,0 +1,42 @@
+parameters:
+- name: 'gitVersionConfigFilePath'
+  type: string
+- name: 'rootBranchName'
+  displayName: 'Name of the root branch of the repository triggering the build.'
+  type: string
+
+steps:     
+  - powershell: |
+      if('$(system.pullrequest.targetbranch)' -eq '${{ parameters.rootBranchName }}')  
+      {
+        $sourceBranch = ('$(system.pullrequest.sourcebranch)' -split '/')[-1]
+        Write-Host "##vso[task.setvariable variable=BUILD_PR_SOURCEBRANCH]-$sourceBranch"  
+      } else {
+        Write-Host "##vso[task.setvariable variable=BUILD_PR_SOURCEBRANCH]"
+      }
+    displayName: 'Versioning - Set BUILD_PR_SOURCEBRANCH'   
+
+  - task: gittools.gittools.setup-gitversion-task.gitversion/setup@0
+    displayName: Versioning - Setup Gitversion
+    inputs:
+      versionSpec: 5.x
+
+  # Gitversion will makes these variables available:  
+  # https://gitversion.readthedocs.io/en/latest/input/docs/more-info/variables/
+  - task: gittools.gittools.execute-gitversion-task.gitversion/execute@0
+    displayName: Versioning - Compute Gitversion
+    inputs:
+      useConfigFile: true
+      configFilePath: ${{ parameters.gitVersionConfigFilePath }}
+
+  - powershell: |
+      if('$(BUILD_PR_SOURCEBRANCH)' -ne '')  
+      {
+        $sourceBranch = ('$(system.pullrequest.sourcebranch)' -split '/')[-1]
+        Write-Host "##vso[build.updatebuildnumber]$(Build.BuildNumber) [$sourceBranch-$(Gitversion.AssemblySemFileVer)]"  
+        Write-Host "##vso[task.setvariable variable=VERSIONING_PACKAGEVERSION]$(Gitversion.InformationalVersion)-$(Gitversion.AssemblySemFileVer)"  
+      } else {
+        Write-Host "##vso[build.updatebuildnumber]$(Build.BuildNumber) [$(Gitversion.AssemblySemFileVer)]" 
+        Write-Host "##vso[task.setvariable variable=VERSIONING_PACKAGEVERSION]$(Gitversion.InformationalVersion)" 
+      }
+    displayName: 'Versioning - Set VERSIONING_PACKAGEVERSION'     

@@ -1,0 +1,36 @@
+parameters:
+- name: 'azureArtifactsFeed'
+  type: string
+- name: 'buildConfiguration'
+  default: 'Release'
+  type: string
+- name: 'runSettingsFile'
+  type: string
+- name: 'projects'
+  type: string
+  default: '**/*.sln'
+- name: 'testProjects'
+  type: string
+  default: '**/*Tests.csproj'
+
+steps:
+- task: DotNetCoreCLI@2
+  displayName: Restore
+  inputs:
+    projects: '${{ parameters.projects }}'
+    command: 'restore'
+    feedsToUse: 'select'
+    vstsFeed: '${{ parameters.azureArtifactsFeed }}'
+
+- task: DotNetCoreCLI@2
+  displayName: Build
+  inputs:
+    projects: '${{ parameters.projects }}'
+    arguments: '--no-restore --configuration ${{ parameters.buildConfiguration }}'
+
+- task: DotNetCoreCLI@2
+  displayName: Test
+  inputs:
+    command: test
+    projects: '${{ parameters.testProjects }}'
+    arguments: '--configuration ${{ parameters.buildConfiguration }} --settings ${{ parameters.runSettingsFile }}'
