@@ -7,7 +7,7 @@ parameters:
 
 steps:     
   - powershell: |
-      if('$(system.pullrequest.targetbranch)' -eq '${{ parameters.rootBranchName }}')  
+      if(('$(system.pullrequest.targetbranch)' -split '/')[-1] -eq ('${{ parameters.rootBranchName }}' -split '/')[-1])  
       {
         $sourceBranch = ('$(system.pullrequest.sourcebranch)' -split '/')[-1]
         Write-Host "##vso[task.setvariable variable=BUILD_PR_SOURCEBRANCH]-$sourceBranch"  
