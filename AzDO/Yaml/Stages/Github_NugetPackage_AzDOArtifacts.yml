@@ -46,6 +46,7 @@ stages:
         packagesToPush: '$(System.DefaultWorkingDirectory)/src/**/*.nupkg'
         publishVstsFeed: '${{ parameters.azureArtifactsFeed }}'
 
+    # https://marketplace.visualstudio.com/items?itemName=KriefMikael.githubtools
     - task: GitHubTag@1
       displayName: Versioning - Tag commit on release'
       inputs:
