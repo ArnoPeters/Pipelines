@@ -16,11 +16,13 @@ steps:
       }
     displayName: 'Versioning - Set BUILD_PR_SOURCEBRANCH'   
 
+  # https://marketplace.visualstudio.com/items?itemName=gittools.gittools
   - task: gittools.gittools.setup-gitversion-task.gitversion/setup@0
     displayName: Versioning - Setup Gitversion
     inputs:
       versionSpec: 5.x
 
+  # https://marketplace.visualstudio.com/items?itemName=gittools.gittools
   # Gitversion will makes these variables available:  
   # https://gitversion.readthedocs.io/en/latest/input/docs/more-info/variables/
   - task: gittools.gittools.execute-gitversion-task.gitversion/execute@0
