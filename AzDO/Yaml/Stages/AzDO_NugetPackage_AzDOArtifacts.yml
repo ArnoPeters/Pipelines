@@ -43,6 +43,7 @@ stages:
         packagesToPush: '$(System.DefaultWorkingDirectory)/src/**/*.nupkg'
         publishVstsFeed: '${{ parameters.azureArtifactsFeed }}'
     
+    # https://marketplace.visualstudio.com/items?itemName=ATP.ATP-GitTag
     - task: ATP.ATP-GitTag.GitTag.GitTag@6
       displayName: 'Versioning - Tag commit on release'
       inputs:
