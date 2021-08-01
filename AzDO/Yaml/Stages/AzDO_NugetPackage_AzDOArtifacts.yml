@@ -29,7 +29,15 @@ stages:
       parameters:
         gitVersionConfigFilePath: "GitVersion.yml"
         rootBranchName: ${{ parameters.rootBranchName }}
-   
+    
+    # https://marketplace.visualstudio.com/items?itemName=ATP.ATP-GitTag
+    - task: ATP.ATP-GitTag.GitTag.GitTag@6
+      displayName: 'Versioning - Tag commit on release'
+      inputs:
+        tag: 'v$(Gitversion.MajorMinorPatch)'
+        tagMessage: 'Release of Nuget package'
+      condition: eq('${{ variables['Build.SourceBranch'] }}', '${{ parameters.rootBranchName }}')
+      
     - template: ..\Steps\BuildAndTest.yml
       parameters:
         azureArtifactsFeed: ${{ parameters.azureArtifactsFeed }}
@@ -42,14 +50,7 @@ stages:
         command: push
         packagesToPush: '$(System.DefaultWorkingDirectory)/src/**/*.nupkg'
         publishVstsFeed: '${{ parameters.azureArtifactsFeed }}'
-    
-    # https://marketplace.visualstudio.com/items?itemName=ATP.ATP-GitTag
-    - task: ATP.ATP-GitTag.GitTag.GitTag@6
-      displayName: 'Versioning - Tag commit on release'
-      inputs:
-        tag: 'v$(Gitversion.MajorMinorPatch)'
-        tagMessage: 'Release of Nuget package'
-      condition: eq('${{ variables['Build.SourceBranch'] }}', '${{ parameters.rootBranchName }}')
+
 
     - task: PublishSymbols@2
       displayName: 'Nuget - Publish symbols to artifacts'
