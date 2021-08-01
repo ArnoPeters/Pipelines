@@ -4,9 +4,6 @@ parameters:
 - name: 'buildConfiguration'
   default: 'Release'
   type: string
-- name: 'buildPlatform'
-  default: 'AnyCPU'
-  type: string  
 - name: 'runSettingsFile'
   type: string
 - name: 'projects'
@@ -29,7 +26,7 @@ steps:
   displayName: Build
   inputs:
     projects: '${{ parameters.projects }}'
-    arguments: '--no-restore --configuration ${{ parameters.buildConfiguration }} /p:Platform=${{ parameters.buildPlatform }}'
+    arguments: '--no-restore --configuration ${{ parameters.buildConfiguration }}'
 
 - task: DotNetCoreCLI@2
   displayName: Test
