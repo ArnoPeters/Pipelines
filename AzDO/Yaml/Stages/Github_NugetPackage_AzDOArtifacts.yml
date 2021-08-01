@@ -39,13 +39,6 @@ stages:
         buildConfiguration: ${{ parameters.buildConfiguration }}
         runSettingsFile: ${{ parameters.runSettingsFile }}
 
-    - task: DotNetCoreCLI@2
-      displayName: 'NuGet - Push package(s) to [${{ parameters.azureArtifactsFeed }}]'
-      inputs:
-        command: push
-        packagesToPush: '$(System.DefaultWorkingDirectory)/src/**/*.nupkg'
-        publishVstsFeed: '${{ parameters.azureArtifactsFeed }}'
-
     # https://marketplace.visualstudio.com/items?itemName=KriefMikael.githubtools
     - task: GitHubTag@1
       displayName: Versioning - Tag commit on release'
@@ -54,7 +47,14 @@ stages:
         repositoryName: '$(Build.Repository.Name)'
         tag: 'v$(Gitversion.MajorMinorPatch)'
       condition: eq('${{ variables['Build.SourceBranch'] }}', '${{ parameters.rootBranchName }}')
-      
+
+    - task: DotNetCoreCLI@2
+      displayName: 'NuGet - Push package(s) to [${{ parameters.azureArtifactsFeed }}]'
+      inputs:
+        command: push
+        packagesToPush: '$(System.DefaultWorkingDirectory)/src/**/*.nupkg'
+        publishVstsFeed: '${{ parameters.azureArtifactsFeed }}'      
+        
     - task: PublishSymbols@2
       displayName: 'Nuget - Publish symbols to artifacts'
       inputs:
