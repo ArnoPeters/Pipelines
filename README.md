@@ -21,7 +21,7 @@ It also provides automatic versioning (using GitVersion) and produces Source Lin
 
 ## Install (FREE) Azure Devops Marketplace tasks
 When using the Azure Devops-specific templates, errors will be thrown if used tasks are not installed from the marketplace. Not all tasks are used in all pipelines
-Below is a list of the tasks used in this repository. The links to the tasks will also be added as comment to the actual template files. 
+Below is a list of the tasks used in this repository. The links to the tasks will also be added as comment at the top in of the actual template files. 
 
 - https://marketplace.visualstudio.com/items?itemName=ATP.ATP-GitTag
 - https://marketplace.visualstudio.com/items?itemName=gittools.gittools
