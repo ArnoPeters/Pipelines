@@ -48,8 +48,8 @@ stages:
         githubEndpoint: '${{ parameters.githubEndpoint }}'
         repositoryName: '$(Build.Repository.Name)'
         tag: 'v$(Gitversion.MajorMinorPatch)'
-      condition: eq('${{ variables['Build.SourceBranch'] }}', '${{ parameters.rootBranchName }}')
-
+      condition: and(succeeded(), eq('${{ variables['Build.SourceBranch'] }}', '${{ parameters.rootBranchName }}'))
+ 
     - task: DotNetCoreCLI@2
       displayName: 'NuGet - Push package(s) to [${{ parameters.azureArtifactsFeed }}]'
       inputs:
