@@ -1,20 +1,23 @@
+The purpose of this repository is to provide reusable elements for build pipelines. Currently it is scoped toward Azure Devops and Github Actions. 
+
 # Instructions: 
-This is a template repository for creating a nuget package hosted in github, but to be build in Azure Devops and published to Azure Devops Artifacts. 
-It produces a pre-release version with from the merge build when a pull request is active, and a release version when the pull request is merged. 
-It also provides automatic versioning (using GitVersion) and produces Source Link enabled debug symbols, allowing debugging into the package. 
 
 ## One Time Setup
 
-### Create a copy of this repo in your own Github account
-- _Reason required Is it even possible to depend directly on this repo, even if public? If you are not a member, can you authenticate? --> TEST THIS and explain correctly_
-- If you want to be able to pull future commits from this repo, or contribute with pull requests: [create a fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo)
+It is technically possible to create pipelines in another github account that depend directly on this repository, but then updates to this repository will directly affect those pipelines, 
+For this reason, it is very much recommended to create a copy of this repo in your own Github account.
 - If you just want to create a starting point: [use this repository as template](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-on-github/creating-a-repository-from-a-template).
-- Delete this "One Time Setup" chapter from the readme.md in the new repository. 
+- If you want to be able to pull future commits from this repo, or contribute with pull requests: [create a fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo)
 
-## Install (FREE) Azure Devops Marketplace tasks
-When using the Azure Devops-specific templates, errors will be thrown if used tasks are not installed from the marketplace. Not all tasks are used in all pipelines
-Below is a list of the tasks used in this repository. The links to the tasks will also be added as comment at the top in of the actual template files. 
+### TODO: deal with the "variables" template - 
+_Decide wether to leave this in_
+
+## Azure Devops Setup - ## Install (FREE) Azure Devops Marketplace tasks
+When using the Azure Devops-specific templates, errors will be thrown if the templates uses tasks are not previously installed from the marketplace. 
+Below is a list of the tasks used in this repository. 
+Note: not every pipeline needs all tasks. The links to the tasks will also be added as comment at the top in of the actual template files to assist in adding only on demand. 
 
 - https://marketplace.visualstudio.com/items?itemName=ATP.ATP-GitTag
 - https://marketplace.visualstudio.com/items?itemName=gittools.gittools
 - https://marketplace.visualstudio.com/items?itemName=KriefMikael.githubtools
+
