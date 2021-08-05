@@ -1,3 +1,6 @@
+# Azure Devops Marketplace tasks used in this template: 
+# - https://marketplace.visualstudio.com/items?itemName=ATP.ATP-GitTag
+
 parameters:
 - name: azureArtifactsFeed
 - name: 'pool'
@@ -30,7 +33,6 @@ stages:
         gitVersionConfigFilePath: "GitVersion.yml"
         rootBranchName: ${{ parameters.rootBranchName }}
     
-    # https://marketplace.visualstudio.com/items?itemName=ATP.ATP-GitTag
     - task: ATP.ATP-GitTag.GitTag.GitTag@6
       displayName: 'Versioning - Tag commit on release'
       inputs:
