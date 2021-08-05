@@ -1,6 +1,5 @@
-The purpose of this repository is to provide reusable elements for build pipelines. Currently it is scoped toward Azure Devops and Github Actions. 
-
 # Instructions: 
+The purpose of this repository is to provide reusable elements for build pipelines. Currently it is scoped toward Azure Devops and Github Actions. 
 
 ## One Time Setup
 
