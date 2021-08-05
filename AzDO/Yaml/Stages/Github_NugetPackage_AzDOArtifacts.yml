@@ -1,3 +1,6 @@
+# Azure Devops Marketplace tasks used in this template: 
+# - https://marketplace.visualstudio.com/items?itemName=KriefMikael.githubtools
+
 parameters:
 - name: azureArtifactsFeed
 - name: 'pool'
@@ -39,7 +42,6 @@ stages:
         buildConfiguration: ${{ parameters.buildConfiguration }}
         runSettingsFile: ${{ parameters.runSettingsFile }}
 
-    # https://marketplace.visualstudio.com/items?itemName=KriefMikael.githubtools
     - task: GitHubTag@1
       displayName: Versioning - Tag commit on release'
       inputs:
