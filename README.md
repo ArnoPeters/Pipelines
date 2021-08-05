@@ -4,3 +4,7 @@
 			- Installed tasks: 
 			- (link to azure marketplace) ?
 - 
+
+### Azure Devops Marketplace tasks
+- https://marketplace.visualstudio.com/items?itemName=ATP.ATP-GitTag
+- https://marketplace.visualstudio.com/items?itemName=gittools.gittools
