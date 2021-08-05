@@ -38,7 +38,7 @@ stages:
       inputs:
         tag: 'v$(Gitversion.MajorMinorPatch)'
         tagMessage: 'Release of Nuget package'
-      condition: eq('${{ variables['Build.SourceBranch'] }}', '${{ parameters.rootBranchName }}')
+      condition: and(succeeded(), eq('${{ variables['Build.SourceBranch'] }}', '${{ parameters.rootBranchName }}'))
       
     - template: ..\Steps\BuildAndTest.yml
       parameters:
