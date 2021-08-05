@@ -10,7 +10,7 @@ For this reason, it is very much recommended to create a copy of this repo in yo
 - If you want to be able to pull future commits from this repo, or contribute with pull requests: [create a fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo)
 
 ### TODO: deal with the "variables" template - 
-_Decide wether to leave this in? Perhaps use a private fork? https://deanmalone.net/post/how-to-fork-your-own-repo-on-github/
+_Decide wether to leave this in? Perhaps use a private fork? https://deanmalone.net/post/how-to-fork-your-own-repo-on-github/_
 
 ## Azure Devops Setup - ## Install (FREE) Azure Devops Marketplace tasks
 When using the Azure Devops-specific templates, errors will be thrown if the templates uses tasks are not previously installed from the marketplace. 
