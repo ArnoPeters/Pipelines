@@ -17,10 +17,9 @@ It also provides automatic versioning (using GitVersion) and produces Source Lin
 - _Reason required Is it even possible to depend directly on this repo, even if public? If you are not a member, can you authenticate? --> TEST THIS and explain correctly_
 - If you want to be able to pull future commits from this repo, or contribute with pull requests: [create a fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo)
 - If you just want to create a starting point: [use this repository as template](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-on-github/creating-a-repository-from-a-template).
-- Set the new repository as [template repository](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-on-github/creating-a-template-repository).
 - Delete this "One Time Setup" chapter from the readme.md in the new repository. 
-- 
-### Install (FREE) Azure Devops Marketplace tasks
+
+## Install (FREE) Azure Devops Marketplace tasks
 When using the Azure Devops-specific templates, errors will be thrown if used tasks are not installed from the marketplace. Not all tasks are used in all pipelines
 Below is a list of the tasks used in this repository. 
 
