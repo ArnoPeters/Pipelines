@@ -22,7 +22,10 @@ parameters:
   type: string
 - name: 'runSettingsFile'
   type: string
-
+- name: 'gitVersionConfigFilePath'
+  type: string  
+  default: "GitVersion.yml"
+  
 stages:
 - stage: Build
   displayName: Build and Publish nuget package 
@@ -39,7 +42,7 @@ stages:
 
     - template: ..\Steps\ComputeGitVersion.yml
       parameters:
-        gitVersionConfigFilePath: "GitVersion.yml"
+        gitVersionConfigFilePath: ${{ parameters.gitVersionConfigFilePath }}
         rootBranchName: ${{ parameters.rootBranchName }}
     
     - task: ATP.ATP-GitTag.GitTag.GitTag@6
