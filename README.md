@@ -1,4 +1,4 @@
-The purpose of this repository is to provide reusable building blocks implementing specific workflows for CI/CD pipelines. Currently it is scoped toward pipelines in Azure Devops, and pipelines that use Github Actions. 
+The purpose of this repository is to provide reusable building blocks implementing specific workflows for CI/CD pipelines. It is currently scoped toward pipelines in Azure Devops, and pipelines that use Github Actions. 
 
 # One Time Setup
 
