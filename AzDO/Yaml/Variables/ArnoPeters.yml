@@ -1,7 +1,0 @@
-variables:
-  - name: company
-    value: 'Arno Peters'  
-  - name: authors
-    value: 'Arno Peters'  
-  - name: copyright
-    value: 'Arno Peters'      

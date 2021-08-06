@@ -1,0 +1,7 @@
+variables:
+  - name: company
+    value: ''  
+  - name: authors
+    value: ''  
+  - name: copyright
+    value: ''      
