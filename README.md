@@ -17,6 +17,6 @@ When using the Azure Devops-specific templates, errors will be thrown if the tem
 Below is a list of the tasks used in this repository. 
 Note: not every pipeline needs all tasks. The links to the tasks will also be added as comment at the top in of the actual template files to assist in adding only on demand. 
 
-- [(Free) - GitVersion](https://marketplace.visualstudio.com/items?itemName=gittools.gittools)
+- [(Free) - GitVersion Tools](https://marketplace.visualstudio.com/items?itemName=gittools.gittools)
 - [(Free) - Git Tag - Azure Devops Git Repo Tagging](https://marketplace.visualstudio.com/items?itemName=ATP.ATP-GitTag)
 - [(Free) - Github Tag - Github Repo Tagging](https://marketplace.visualstudio.com/items?itemName=KriefMikael.githubtools)
