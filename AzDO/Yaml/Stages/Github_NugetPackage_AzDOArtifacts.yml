@@ -1,3 +1,12 @@
+# Full workflow for creating a pipeline in Azure Devops to create nuget packages from an Github repo, to be published to Azure Devops Artifacts. 
+# Features: 
+#   - Pre-release on Pull Request
+#   - Full release when a Pull Request is accepted and merged
+#   - Gitversion is used for automatic semantic versioning
+#   - Outputs debug symbols and uses Source Link to provide step-into-package-code during debugging
+#
+# Best used in combination with the template nuget package (TODO: link)
+#
 # Azure Devops Marketplace tasks used in this template: 
 # - https://marketplace.visualstudio.com/items?itemName=KriefMikael.githubtools
 
