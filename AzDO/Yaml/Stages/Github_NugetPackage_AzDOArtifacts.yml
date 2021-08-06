@@ -24,7 +24,9 @@ parameters:
   type: string
 - name: 'githubEndpoint'
   type: string
-
+- name: 'gitVersionConfigFilePath'
+  type: string  
+  default: "GitVersion.yml"
 
 stages:
 - stage: Build
@@ -42,7 +44,7 @@ stages:
 
     - template: ..\Steps\ComputeGitVersion.yml
       parameters:
-        gitVersionConfigFilePath: "GitVersion.yml"
+        gitVersionConfigFilePath: ${{ parameters.gitVersionConfigFilePath }}
         rootBranchName: ${{ parameters.rootBranchName }}
    
     - template: ..\Steps\BuildAndTest.yml
