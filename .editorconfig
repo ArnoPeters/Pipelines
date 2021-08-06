@@ -1,6 +1,12 @@
 # top-most EditorConfig file
 root = true
 
+# General style: use spaces. Don't specify an indent_size for everything here, this will mess up too many files unintentionally. 
+[*]
+indent_style = space
+
 [*.{yml,yaml}]
-indent_style = Space
+indent_size = 2
+
+[*.{json}]
 indent_size = 2
