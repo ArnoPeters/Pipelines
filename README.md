@@ -9,9 +9,6 @@ It is technically possible to create pipelines in another github account that de
 ## Azure Devops
 _This only applies when using this repository for Azure Devops_
 
-### Authors
-Check and update the values of the variables in "AzDo/Yaml/Variables/Authors.yml". This file can used in several workflows (like the (LINK TO) nuget package templates when made public), and ensures that your authoring information is uniformly embedded in your packages. (TODO: copyright and license should go in nuget repo, not here)
-
 ### Install Azure Devops Marketplace tasks
 When using the Azure Devops-specific templates, errors will be thrown if the templates uses tasks are not previously installed from the marketplace. 
 Below is a list of the tasks used in this repository. 
@@ -20,3 +17,6 @@ Note: not every pipeline needs all tasks. The links to the tasks will also be ad
 - [(Free) - GitVersion Tools](https://marketplace.visualstudio.com/items?itemName=gittools.gittools)
 - [(Free) - Git Tag - Azure Devops Git Repo Tagging](https://marketplace.visualstudio.com/items?itemName=ATP.ATP-GitTag)
 - [(Free) - Github Tag - Github Repo Tagging](https://marketplace.visualstudio.com/items?itemName=KriefMikael.githubtools)
+
+### (Optional) Authors
+Check and update the values of the variables in "AzDo/Yaml/Variables/Authors.yml". This file can used in several workflows (like the (LINK TO) nuget package templates when made public), and ensures that your authoring information is uniformly embedded in your packages. (TODO: copyright and license should go in nuget repo, not here)
