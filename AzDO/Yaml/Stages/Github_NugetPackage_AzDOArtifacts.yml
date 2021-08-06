@@ -7,7 +7,8 @@
 #
 # Best used in combination with the template nuget package (TODO: link)
 #
-# Azure Devops Marketplace tasks used in this template: 
+# Azure Devops Marketplace tasks required to use this template: 
+# - https://marketplace.visualstudio.com/items?itemName=gittools.gittools)
 # - https://marketplace.visualstudio.com/items?itemName=KriefMikael.githubtools
 
 parameters:
