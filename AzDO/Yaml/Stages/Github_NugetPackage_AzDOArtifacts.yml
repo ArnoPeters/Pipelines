@@ -1,4 +1,4 @@
-# Full workflow for creating a pipeline in Azure Devops to create nuget packages from an Github repo, to be published to Azure Devops Artifacts. 
+# Full workflow for creating a pipeline in Azure Devops to create nuget packages from a Github repo, to be published to Azure Devops Artifacts. 
 # Features: 
 #   - Pre-release on Pull Request
 #   - Full release when a Pull Request is accepted and merged
