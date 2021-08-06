@@ -12,11 +12,11 @@ _This only applies when using this repository for Azure Devops_
 ### Authors
 Check and update the values of the variables in "AzDo/Yaml/Variables/Authors.yml". This file can used in several workflows (like the (LINK TO) nuget package templates when made public), and ensures that your authoring information is uniformly embedded in your packages. (TODO: copyright and license should go in nuget repo, not here)
 
-### Install (FREE) Azure Devops Marketplace tasks
+### Install Azure Devops Marketplace tasks
 When using the Azure Devops-specific templates, errors will be thrown if the templates uses tasks are not previously installed from the marketplace. 
 Below is a list of the tasks used in this repository. 
 Note: not every pipeline needs all tasks. The links to the tasks will also be added as comment at the top in of the actual template files to assist in adding only on demand. 
 
-- https://marketplace.visualstudio.com/items?itemName=ATP.ATP-GitTag
-- https://marketplace.visualstudio.com/items?itemName=gittools.gittools
-- https://marketplace.visualstudio.com/items?itemName=KriefMikael.githubtools
+- [(Free) - GitVersion](https://marketplace.visualstudio.com/items?itemName=gittools.gittools)
+- [(Free) - Git Tag - Azure Devops Git Repo Tagging](https://marketplace.visualstudio.com/items?itemName=ATP.ATP-GitTag)
+- [(Free) - Github Tag - Github Repo Tagging](https://marketplace.visualstudio.com/items?itemName=KriefMikael.githubtools)
