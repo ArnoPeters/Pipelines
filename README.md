@@ -3,8 +3,7 @@ The purpose of this repository is to provide reusable building blocks implementi
 
 ## One Time Setup
 
-It is technically possible to create pipelines in another github account that depend directly on this repository, but then updates to this repository will directly affect those pipelines, 
-For this reason, it is very much recommended to create a copy of this repo in your own Github account.
+It is technically possible to create pipelines in another github account that depend directly on this (public) repository. This might cause unexpected behavior in those pipelines when this repository is updated. For this reason, it is very much recommended to keep your pipelines stable by creating a copy of this repo in your own Github account.
 - If you just want to create a starting point: [use this repository as template](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-on-github/creating-a-repository-from-a-template).
 - If you want to be able to pull future commits from this repo, or contribute with pull requests: [create a fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo)
 
