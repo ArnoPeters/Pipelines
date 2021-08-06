@@ -11,7 +11,7 @@ _This only applies when using this repository for Azure Devops_
 
 _TODO: REWRITE BELOW_
 ### Authors
-Check the values to the variables in "AzDo/Yaml/Variables/Authors.yml". This file is used in several workflows, and ensures that your authoring information is uniformly embedded in your packages. (TODO: copyright and license should go in nuget repo, not here)
+Check the values to the variables in "AzDo/Yaml/Variables/Authors.yml". This file can used in several workflows (like the (LINK TO) nuget package templates), and ensures that your authoring information is uniformly embedded in your packages. (TODO: copyright and license should go in nuget repo, not here)
 
 ### Install (FREE) Azure Devops Marketplace tasks
 When using the Azure Devops-specific templates, errors will be thrown if the templates uses tasks are not previously installed from the marketplace. 
