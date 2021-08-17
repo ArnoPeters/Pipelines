@@ -6,6 +6,8 @@ It is technically possible to create pipelines in another github account that de
 - If you just want to create a starting point: [use this repository as template](https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-on-github/creating-a-repository-from-a-template).
 - If you want to be able to pull future commits from this repo, or contribute with pull requests: [create a fork](https://docs.github.com/en/get-started/quickstart/fork-a-repo)
 
+After creating a copy, the templates in the copy can be used in your projects. 
+
 ## Azure Devops
 _This only applies when using this repository for Azure Devops_
 
