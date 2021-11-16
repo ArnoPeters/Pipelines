@@ -27,4 +27,6 @@ steps:
           }
         }
       name: '${{ parameters.Prefix }}ArmOutputVariables'
-      displayName: 'Expose ARM output variables'
+      displayName: 'Expose ARM output variables
+      
+    - script: echo $(${{ parameters.Prefix }}ArmOutputVariables.storageAccountName)
