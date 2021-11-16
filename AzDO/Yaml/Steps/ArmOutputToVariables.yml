@@ -11,20 +11,20 @@ steps:
         $outputs = '${{ parameters.ArmOutputJson }}' | ConvertFrom-Json
         $outputs.PSObject.Properties | ForEach-Object {
           $type = ($_.value.type).ToLower()
-          $keyname = "{0}{1}" -f '${{ parameters.Prefix}}', $_.name 
+          $keyname = $_.name 
           $value = $_.value.value
 
           if ($type -eq "securestring") {
-            $var = '##vso[task.setvariable variable={0};issecret=true]{1}' -f $keyname, $value
+            $var = '##vso[task.setvariable variable={0};issecret=true]{1};isOutput=true;' -f $keyname, $value
             Write-Output $var
-            Write-Output "Added VSTS variable '$keyname' ('$type')"
+            Write-Output "Added output variable '${{ parameters.Prefix }}ArmOutputVariables.$keyname' ('$type')"
           } elseif ($type -eq "string") {
-            $var = '##vso[task.setvariable variable={0}]{1}' -f $keyname, $value
+            $var = '##vso[task.setvariable variable={0}]{1};isOutput=true;' -f $keyname, $value
             Write-Output $var
-            Write-Output "Added VSTS variable '$keyname' ('$type') with value '$value'"
+            Write-Output "Added output variable '${{ parameters.Prefix }}ArmOutputVariables.$keyname' ('$type') with value '$value'"
           } else {
             Write-Output "Skipped conversion: Type '$type' is not supported for '$keyname'"
           }
         }
-      name: ArmOutputToVariables
+      name: '${{ parameters.Prefix }}ArmOutputVariables'
       displayName: 'Expose ARM output variables'
