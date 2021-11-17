@@ -1,9 +1,9 @@
 parameters:
 - name: 'Subscription'
   type: string
-- name: 'ResourceLocation'
-  type: string
 - name: 'ResourceGroupName'
+  type: string
+- name: 'ResourceLocation'
   type: string
 - name: 'TemplateFile'
   type: string
@@ -21,8 +21,8 @@ steps:
   displayName: 'ARM: Template deployment'
   inputs:
     azureSubscription: '${{ parameters.Subscription }}'
-    resourceGroupName: '${{ parameters.ResourceLocation }}'
-    location: '${{ parameters.ResourceGroupName }}'
+    resourceGroupName: '${{ parameters.ResourceGroupName }}'
+    location: '${{ parameters.ResourceLocation }}'
     csmFile: '${{ parameters.TemplateFile }}'
     csmParametersFile: '${{ parameters.TemplateParameterFile }}'
     overrideParameters: '${{ parameters.ParameterOverrides }}'
