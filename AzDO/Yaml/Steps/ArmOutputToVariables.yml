@@ -26,5 +26,5 @@ steps:
             Write-Output "Skipped conversion: Type '$type' is not supported for '$keyname'"
           }
         }
-      name: ArmOutputToVariables
+      #name: ArmOutputToVariables #todo: make name variable and test. 
       displayName: 'Expose ARM output variables'
