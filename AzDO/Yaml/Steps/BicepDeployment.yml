@@ -1,0 +1,61 @@
+parameters:
+- name: 'Subscription'
+  type: string
+- name: 'ResourceGroupName'
+  type: string
+- name: 'ResourceLocation'
+  type: string
+- name: 'TemplateFile'
+  type: string
+- name: 'TemplateParameterFile'
+  type: string
+- name: 'ParameterOverrides'
+  type: string
+- name: 'OutputVariableNamePrefix'
+  type: string
+  default: ''
+  
+steps:
+# - task: AzureResourceGroupDeployment@2
+#   #name: deployTemplates #todo: make name variable and test. 
+#   displayName: 'Bicep: Template deployment'
+#   inputs:
+#     azureSubscription: '${{ parameters.Subscription }}'
+#     resourceGroupName: '${{ parameters.ResourceGroupName }}'
+#     location: '${{ parameters.ResourceLocation }}'
+#     csmFile: '${{ parameters.TemplateFile }}'
+#     csmParametersFile: '${{ parameters.TemplateParameterFile }}'
+#     overrideParameters: '${{ parameters.ParameterOverrides }}'
+#     deploymentOutputs: ArmDeploymentOutputs
+
+- task: AzureCLI@2
+  displayName: 'Bicep: Template deployment'
+  inputs:
+    azureSubscription: '${{ parameters.Subscription }}'
+    scriptType: bash
+    scriptLocation: inlineScript
+    inlineScript: |
+      az deployment group create --resource-group ${{ parameters.ResourceGroupName }} --template-file ${{ parameters.TemplateFile }} --parameters @${{ parameters.TemplateParameterFile }} --parameters ${{ parameters.ParameterOverrides }}
+
+#script based on https://www.timmerman.it/index.php/using-values-from-your-arm-template-across-your-azure-devops-pipeline-with-powershell/
+- powershell: |
+    $outputs = '$(ArmDeploymentOutputs)' | ConvertFrom-Json
+    $outputs.PSObject.Properties | ForEach-Object {
+      $type = ($_.value.type).ToLower()
+      $keyname = "{0}{1}" -f '${{ parameters.OutputVariableNamePrefix }}', $_.name 
+      $value = $_.value.value
+
+      if ($type -eq "securestring") {
+        $var = '##vso[task.setvariable variable={0};issecret=true]{1}' -f $keyname, $value
+        Write-Output $var
+        Write-Output "Added variable '$keyname' ('$type')"
+      } elseif ($type -eq "string") {
+        $var = '##vso[task.setvariable variable={0}]{1}' -f $keyname, $value
+        Write-Output $var
+        Write-Output "Added variable '$keyname' ('$type') with value '$value'"
+      } else {
+        Write-Output "Skipped conversion: Type '$type' is not supported for '$keyname'"
+      }
+    }
+  #name: ArmOutputToVariables #todo: make name variable and test. 
+  displayName: 'ARM: Expose output variables'
