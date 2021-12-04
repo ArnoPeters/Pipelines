@@ -52,8 +52,8 @@ steps:
         while IFS=$"\n" read -r c; do
           outputname=$(echo "$c" | jq -r '.[0]')
           outputvalue=$(echo "$c" | jq -r '.[1]')
-          echo "setting variable RGDO_$outputname=$outputvalue"
-          echo "##vso[task.setvariable variable=RGDO_$outputname]$outputvalue"
+          echo "setting variable ${{ parameters.OutputVariableNamePrefix }}$outputname=$outputvalue"
+          echo "##vso[task.setvariable variable=${{ parameters.OutputVariableNamePrefix }}$outputname]$outputvalue"
         done
 
 # #script based on https://www.timmerman.it/index.php/using-values-from-your-arm-template-across-your-azure-devops-pipeline-with-powershell/
