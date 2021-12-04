@@ -28,6 +28,7 @@ steps:
 #     overrideParameters: '${{ parameters.ParameterOverrides }}'
 #     deploymentOutputs: ArmDeploymentOutputs
 
+#//https://blog.johnnyreilly.com/2021/03/20/bicep-meet-azure-pipelines/
 - task: AzureCLI@2
   displayName: 'Bicep: Template deployment'
   inputs:
@@ -35,27 +36,45 @@ steps:
     scriptType: bash
     scriptLocation: inlineScript
     inlineScript: |
-      az deployment group create --resource-group ${{ parameters.ResourceGroupName }} --template-file ${{ parameters.TemplateFile }} --parameters @${{ parameters.TemplateParameterFile }} --parameters ${{ parameters.ParameterOverrides }}
+      az deployment group create \
+        --name deploy \
+        --resource-group ${{ parameters.ResourceGroupName }} \
+        --template-file ${{ parameters.TemplateFile }} \
+        --parameters @${{ parameters.TemplateParameterFile }} \
+        --parameters ${{ parameters.ParameterOverrides }}
 
-#script based on https://www.timmerman.it/index.php/using-values-from-your-arm-template-across-your-azure-devops-pipeline-with-powershell/
-- powershell: |
-    $outputs = '$(ArmDeploymentOutputs)' | ConvertFrom-Json
-    $outputs.PSObject.Properties | ForEach-Object {
-      $type = ($_.value.type).ToLower()
-      $keyname = "{0}{1}" -f '${{ parameters.OutputVariableNamePrefix }}', $_.name 
-      $value = $_.value.value
+      echo "az deployment group show --resource-group '$(resourceGroupName)' --name deploy"
+      deploymentoutputs=$(az deployment group show --resource-group '$(resourceGroupName)' --name deploy \
+        --query properties.outputs)
 
-      if ($type -eq "securestring") {
-        $var = '##vso[task.setvariable variable={0};issecret=true]{1}' -f $keyname, $value
-        Write-Output $var
-        Write-Output "Added variable '$keyname' ('$type')"
-      } elseif ($type -eq "string") {
-        $var = '##vso[task.setvariable variable={0}]{1}' -f $keyname, $value
-        Write-Output $var
-        Write-Output "Added variable '$keyname' ('$type') with value '$value'"
-      } else {
-        Write-Output "Skipped conversion: Type '$type' is not supported for '$keyname'"
-      }
-    }
-  #name: ArmOutputToVariables #todo: make name variable and test. 
-  displayName: 'ARM: Expose output variables'
+      echo 'convert outputs to variables'
+      echo $deploymentoutputs | jq -c '. | to_entries[] | [.key, .value.value]' |
+        while IFS=$"\n" read -r c; do
+          outputname=$(echo "$c" | jq -r '.[0]')
+          outputvalue=$(echo "$c" | jq -r '.[1]')
+          echo "setting variable RGDO_$outputname=$outputvalue"
+          echo "##vso[task.setvariable variable=RGDO_$outputname]$outputvalue"
+        done
+
+# #script based on https://www.timmerman.it/index.php/using-values-from-your-arm-template-across-your-azure-devops-pipeline-with-powershell/
+# - powershell: |
+#     $outputs = '$(ArmDeploymentOutputs)' | ConvertFrom-Json
+#     $outputs.PSObject.Properties | ForEach-Object {
+#       $type = ($_.value.type).ToLower()
+#       $keyname = "{0}{1}" -f '${{ parameters.OutputVariableNamePrefix }}', $_.name 
+#       $value = $_.value.value
+
+#       if ($type -eq "securestring") {
+#         $var = '##vso[task.setvariable variable={0};issecret=true]{1}' -f $keyname, $value
+#         Write-Output $var
+#         Write-Output "Added variable '$keyname' ('$type')"
+#       } elseif ($type -eq "string") {
+#         $var = '##vso[task.setvariable variable={0}]{1}' -f $keyname, $value
+#         Write-Output $var
+#         Write-Output "Added variable '$keyname' ('$type') with value '$value'"
+#       } else {
+#         Write-Output "Skipped conversion: Type '$type' is not supported for '$keyname'"
+#       }
+#     }
+#   #name: ArmOutputToVariables #todo: make name variable and test. 
+#   displayName: 'ARM: Expose output variables'
