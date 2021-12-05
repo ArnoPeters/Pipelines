@@ -38,9 +38,9 @@ steps:
     scriptType: bash
     scriptLocation: inlineScript
     inlineScript: |
-      params = "2"
+      params="2"
       if ['${{ parameters.ParameterOverrides }}' != '']; then 
-       params = params + "--parameters ${{ parameters.ParameterOverrides }}"
+       params=$params+"--parameters ${{ parameters.ParameterOverrides }}"
       fi
       echo $params
       az deployment group create \
