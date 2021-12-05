@@ -11,6 +11,7 @@ parameters:
   type: string
 - name: 'ParameterOverrides'
   type: string
+  default: ''
 - name: 'OutputVariableNamePrefix'
   type: string
   default: ''
@@ -37,12 +38,16 @@ steps:
     scriptType: bash
     scriptLocation: inlineScript
     inlineScript: |
+      params = ""
+      if ['${{ parameters.ParameterOverrides }}' != '']; then 
+       params = params + "--parameters ${{ parameters.ParameterOverrides }}"
+      fi
       az deployment group create \
         --name deploy \
         --resource-group ${{ parameters.ResourceGroupName }} \
         --template-file ${{ parameters.TemplateFile }} \
         --parameters @${{ parameters.TemplateParameterFile }} \
-        --parameters ${{ parameters.ParameterOverrides }}
+        $params
 
       echo "az deployment group show --resource-group '$(resourceGroupName)' --name deploy"
       deploymentoutputs=$(az deployment group show --resource-group '$(resourceGroupName)' --name deploy \
