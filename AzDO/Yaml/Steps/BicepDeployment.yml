@@ -39,7 +39,7 @@ steps:
     scriptLocation: inlineScript
     inlineScript: |
       params=""
-      if ['${{ parameters.ParameterOverrides }}' != '']; then 
+      if ["${{ parameters.ParameterOverrides }}" != ""]; then 
        params+="--parameters ${{ parameters.ParameterOverrides }}"
       fi
       echo $params
