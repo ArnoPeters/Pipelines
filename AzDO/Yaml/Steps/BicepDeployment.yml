@@ -40,28 +40,30 @@ steps:
     inlineScript: |
       params=""
       if [ "${{ parameters.ParameterOverrides }}" != "" ]; then 
-       params+="--parameters a=2 ${{ parameters.ParameterOverrides }}"
+       params+="--parameters ${{ parameters.ParameterOverrides }}"
       fi
-      echo $params
+      if [ "${{ parameters.TemplateParameterFile }}" != "" ]; then 
+       params+="--parameters @${{ parameters.TemplateParameterFile }}"
+      fi
+      
       az deployment group create \
         --name deploy \
         --resource-group ${{ parameters.ResourceGroupName }} \
         --template-file ${{ parameters.TemplateFile }} \
-        $params \
-        --parameters @${{ parameters.TemplateParameterFile }} \
-        
-
+        $params
 
       echo "az deployment group show --resource-group '$(resourceGroupName)' --name deploy"
       deploymentoutputs=$(az deployment group show --resource-group '$(resourceGroupName)' --name deploy \
         --query properties.outputs)
 
       echo 'convert outputs to variables'
-      echo $deploymentoutputs | jq -c '. | to_entries[] | [.key, .value.value]' |
+      echo $deploymentoutputs | jq -c '. | to_entries[] | [.key, .value.value, .value.type]' |
         while IFS=$"\n" read -r c; do
           outputname=$(echo "$c" | jq -r '.[0]')
           outputvalue=$(echo "$c" | jq -r '.[1]')
+          type=$(echo "$c" | jq -r '.[2]')
           echo "setting variable ${{ parameters.OutputVariableNamePrefix }}$outputname=$outputvalue"
+          echo "type is $type"
           echo "##vso[task.setvariable variable=${{ parameters.OutputVariableNamePrefix }}$outputname]$outputvalue"
         done
 
