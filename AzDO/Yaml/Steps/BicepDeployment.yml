@@ -38,17 +38,19 @@ steps:
     scriptType: bash
     scriptLocation: inlineScript
     inlineScript: |
-      params="2"
+      params=""
       if ['${{ parameters.ParameterOverrides }}' != '']; then 
-       params=$params+"--parameters ${{ parameters.ParameterOverrides }}"
+       params+="--parameters ${{ parameters.ParameterOverrides }}"
       fi
       echo $params
       az deployment group create \
         --name deploy \
         --resource-group ${{ parameters.ResourceGroupName }} \
         --template-file ${{ parameters.TemplateFile }} \
+        $params \
         --parameters @${{ parameters.TemplateParameterFile }} \
-        $params
+        
+
 
       echo "az deployment group show --resource-group '$(resourceGroupName)' --name deploy"
       deploymentoutputs=$(az deployment group show --resource-group '$(resourceGroupName)' --name deploy \
