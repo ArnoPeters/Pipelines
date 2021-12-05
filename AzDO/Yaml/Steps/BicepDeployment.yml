@@ -40,7 +40,7 @@ steps:
     inlineScript: |
       params=""
       if ["${{ parameters.ParameterOverrides }}" != ""]; then 
-       params+="--parameters ${{ parameters.ParameterOverrides }}"
+       params+="--parameters a=2 ${{ parameters.ParameterOverrides }}"
       fi
       echo $params
       az deployment group create \
