@@ -59,33 +59,18 @@ steps:
       echo 'convert outputs to variables'
       echo $deploymentoutputs | jq -c '. | to_entries[] | [.key, .value.value, .value.type]' |
         while IFS=$"\n" read -r c; do
-          outputname=$(echo "$c" | jq -r '.[0]')
-          outputvalue=$(echo "$c" | jq -r '.[1]')
+          keyname=$(echo "$c" | jq -r '.[0]')
+          value=$(echo "$c" | jq -r '.[1]')
           type=$(echo "$c" | jq -r '.[2]')
-          echo "setting variable ${{ parameters.OutputVariableNamePrefix }}$outputname=$outputvalue"
-          echo "type is ${type@L}"
-          echo "##vso[task.setvariable variable=${{ parameters.OutputVariableNamePrefix }}$outputname]$outputvalue"
+          
+          if [ "$type" == "SecureString" ]; then
+            echo "##vso[task.setvariable variable=${{ parameters.OutputVariableNamePrefix }}$keyname;issecret=true]$value"
+            echo "Added variable '$keyname' ('$type')"
+          elseif [ "$type" == "String" ]; then 
+            echo "##vso[task.setvariable variable=${{ parameters.OutputVariableNamePrefix }}$keyname]$value"
+            echo "Added variable '$keyname' ('$type') with value '$value'"
+          else 
+           echo "Skipped conversion: Type '$type' is not supported for '$keyname'"
+          fi
+          
         done
-
-# #script based on https://www.timmerman.it/index.php/using-values-from-your-arm-template-across-your-azure-devops-pipeline-with-powershell/
-# - powershell: |
-#     $outputs = '$(ArmDeploymentOutputs)' | ConvertFrom-Json
-#     $outputs.PSObject.Properties | ForEach-Object {
-#       $type = ($_.value.type).ToLower()
-#       $keyname = "{0}{1}" -f '${{ parameters.OutputVariableNamePrefix }}', $_.name 
-#       $value = $_.value.value
-
-#       if ($type -eq "securestring") {
-#         $var = '##vso[task.setvariable variable={0};issecret=true]{1}' -f $keyname, $value
-#         Write-Output $var
-#         Write-Output "Added variable '$keyname' ('$type')"
-#       } elseif ($type -eq "string") {
-#         $var = '##vso[task.setvariable variable={0}]{1}' -f $keyname, $value
-#         Write-Output $var
-#         Write-Output "Added variable '$keyname' ('$type') with value '$value'"
-#       } else {
-#         Write-Output "Skipped conversion: Type '$type' is not supported for '$keyname'"
-#       }
-#     }
-#   #name: ArmOutputToVariables #todo: make name variable and test. 
-#   displayName: 'ARM: Expose output variables'
