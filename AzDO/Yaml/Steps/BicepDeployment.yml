@@ -61,7 +61,7 @@ steps:
         while IFS=$"\n" read -r c; do
           outputname=$(echo "$c" | jq -r '.[0]')
           outputvalue=$(echo "$c" | jq -r '.[1]')
-          type=$(echo "$c" | jq -r '.[2]')
+          type=${(echo "$c" | jq -r '.[2]')@L}
           echo "setting variable ${{ parameters.OutputVariableNamePrefix }}$outputname=$outputvalue"
           echo "type is $type"
           echo "##vso[task.setvariable variable=${{ parameters.OutputVariableNamePrefix }}$outputname]$outputvalue"
