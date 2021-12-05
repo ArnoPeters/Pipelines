@@ -33,6 +33,7 @@ steps:
   displayName: 'Bicep: Template deployment'
   inputs:
     azureSubscription: '${{ parameters.Subscription }}'
+    failOnStandardError: true
     scriptType: bash
     scriptLocation: inlineScript
     inlineScript: |
