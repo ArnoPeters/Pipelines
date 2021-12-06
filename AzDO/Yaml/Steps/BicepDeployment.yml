@@ -17,19 +17,9 @@ parameters:
   default: ''
   
 steps:
-# - task: AzureResourceGroupDeployment@2
-#   #name: deployTemplates #todo: make name variable and test. 
-#   displayName: 'Bicep: Template deployment'
-#   inputs:
-#     azureSubscription: '${{ parameters.Subscription }}'
-#     resourceGroupName: '${{ parameters.ResourceGroupName }}'
-#     location: '${{ parameters.ResourceLocation }}'
-#     csmFile: '${{ parameters.TemplateFile }}'
-#     csmParametersFile: '${{ parameters.TemplateParameterFile }}'
-#     overrideParameters: '${{ parameters.ParameterOverrides }}'
-#     deploymentOutputs: ArmDeploymentOutputs
 
-#//https://blog.johnnyreilly.com/2021/03/20/bicep-meet-azure-pipelines/
+# Based on the script found on https://blog.johnnyreilly.com/2021/03/20/bicep-meet-azure-pipelines/
+# While awaiting official microsoft pipeline task https://github.com/Azure/bicep/issues/1341
 - task: AzureCLI@2
   displayName: 'Bicep: Template deployment'
   inputs:
