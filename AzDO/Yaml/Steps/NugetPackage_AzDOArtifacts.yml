@@ -72,7 +72,7 @@ steps:
     displayName: Symbols - Publish '${{ parameters.pdbArtifactName }}' artifact
     inputs:
       targetPath: '$(Build.ArtifactStagingDirectory)/${{ parameters.pdbArtifactName }}'
-      artifactName: Symbols
+      artifactName: '${{ parameters.pdbArtifactName }}'
 
 # - task: CopyFiles@2
 #   displayName: Collect *.snupkg for 'Symbol packages' artifact
