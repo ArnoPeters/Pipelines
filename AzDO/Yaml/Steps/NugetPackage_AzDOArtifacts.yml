@@ -60,19 +60,28 @@ steps:
     #sourceFolder: # Optional
     contents: '**/bin/**/*.pdb' 
     targetFolder: '$(Build.ArtifactStagingDirectory)/Symbols'
+    flattenFolders: true
 
-- publish: '$(Build.ArtifactStagingDirectory)/Symbols'
-  artifact: Symbols
+- task: PublishPipelineArtifact@1
+  displayName: Publish 'Symbols' artifact
+  inputs:
+    targetPath: '$(Build.ArtifactStagingDirectory)/Symbols'
+    artifactName: Symbols
 
 - task: CopyFiles@2
   displayName: Collect *.nupgk for 'Package' artifact
   inputs:
     #sourceFolder: # Optional
     contents: '$(System.DefaultWorkingDirectory)/src/**/*.nupkg' 
-    targetFolder: '$(Build.ArtifactStagingDirectory)/Package'
+    targetFolder: '$(Build.ArtifactStagingDirectory)/Packages'
+    flattenFolders: true
 
-- publish: '$(Build.ArtifactStagingDirectory)/Package'
-  artifact: Package
+- task: PublishPipelineArtifact@1
+  displayName: Publish 'Package' artifact
+  inputs:
+    targetPath: '$(Build.ArtifactStagingDirectory)/Packages'
+    artifactName: Packages
+
 
 # - task: DotNetCoreCLI@2
 #   displayName: 'NuGet - Push package(s) to [${{ parameters.azureArtifactsFeed }}]'
