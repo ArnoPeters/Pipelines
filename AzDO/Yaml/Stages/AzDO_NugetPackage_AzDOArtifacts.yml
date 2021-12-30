@@ -27,14 +27,9 @@ parameters:
 - name: 'gitVersionConfigFilePath'
   type: string  
   default: "GitVersion.yml"
-- name: 'authors'
-  type: string  
-  default: ../Variables/Authors.yml
 
 stages:
 - stage: Build
-  variables: 
-  - template: ${{ parameters.authors }}
   displayName: Build and Publish nuget package 
   pool: ${{ parameters.pool }}
   jobs:
