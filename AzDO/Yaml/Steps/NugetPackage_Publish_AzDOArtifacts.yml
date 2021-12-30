@@ -30,6 +30,7 @@ parameters:
 
 jobs:
 - job: PublishAzDO
+  condition: succeeded()
   displayName: Publish package to Azure Devops Artifacts
   pool: ${{ parameters.pool }}
   workspace:
