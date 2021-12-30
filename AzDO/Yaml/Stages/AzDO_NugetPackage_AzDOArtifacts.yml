@@ -7,10 +7,14 @@
 #
 # Best used in combination with the template nuget package (TODO: link)
 #
+# Prerequisites: 
+# The Project Collection Build Server ACCOUNT - not the GROUP needs the following permissions: 
+# - Tag
+# - Contribute
+# These can be set by going to Manage Repositories -> All repositories -> Security
 # Azure Devops Marketplace tasks required to use this template. 
 # Please check them for further prerequisites and permission settings.
 # - https://marketplace.visualstudio.com/items?itemName=gittools.gittools)
-# - https://marketplace.visualstudio.com/items?itemName=ATP.ATP-GitTag
 
 parameters:
 - name: azureArtifactsFeed
@@ -52,14 +56,7 @@ stages:
         git push origin "v$(Gitversion.MajorMinorPatch)"
       condition: and(succeeded(), eq('${{ variables['Build.SourceBranch'] }}', '${{ parameters.rootBranchName }}'))
       workingDirectory: $(Build.SourcesDirectory)
-    
-    # - task: ATP.ATP-GitTag.GitTag.GitTag@6
-    #   displayName: 'Versioning - Tag commit on release'
-    #   inputs:
-    #     tag: 'v$(Gitversion.MajorMinorPatch)'
-    #     tagMessage: 'Release of Nuget package'
-    #   condition: and(succeeded(), eq('${{ variables['Build.SourceBranch'] }}', '${{ parameters.rootBranchName }}'))
-      
+
     - template: ../Steps/BuildAndTest.yml
       parameters:
         azureArtifactsFeed: ${{ parameters.azureArtifactsFeed }}
@@ -72,7 +69,6 @@ stages:
         command: push
         packagesToPush: '$(System.DefaultWorkingDirectory)/src/**/*.nupkg'
         publishVstsFeed: '${{ parameters.azureArtifactsFeed }}'
-
 
     - task: PublishSymbols@2
       displayName: 'Nuget - Publish symbols to artifacts'
