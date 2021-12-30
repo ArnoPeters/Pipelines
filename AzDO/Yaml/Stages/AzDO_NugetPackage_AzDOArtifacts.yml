@@ -7,7 +7,8 @@
 #
 # Best used in combination with the template nuget package (TODO: link)
 #
-# Azure Devops Marketplace tasks required to use this template: 
+# Azure Devops Marketplace tasks required to use this template. 
+# Please check them for further prerequisites and permission settings.
 # - https://marketplace.visualstudio.com/items?itemName=gittools.gittools)
 # - https://marketplace.visualstudio.com/items?itemName=ATP.ATP-GitTag
 
@@ -26,9 +27,14 @@ parameters:
 - name: 'gitVersionConfigFilePath'
   type: string  
   default: "GitVersion.yml"
-  
+- name: 'authors'
+  type: string  
+  default: ../Variables/Authors.yml
+
 stages:
 - stage: Build
+  variables: 
+  - template: ${{ parameters.authors }}
   displayName: Build and Publish nuget package 
   pool: ${{ parameters.pool }}
   jobs:
@@ -41,7 +47,7 @@ stages:
       submodules: true
       persistCredentials: true
 
-    - template: ..\Steps\ComputeGitVersion.yml
+    - template: ../Steps/ComputeGitVersion.yml
       parameters:
         gitVersionConfigFilePath: ${{ parameters.gitVersionConfigFilePath }}
         rootBranchName: ${{ parameters.rootBranchName }}
@@ -53,7 +59,7 @@ stages:
         tagMessage: 'Release of Nuget package'
       condition: and(succeeded(), eq('${{ variables['Build.SourceBranch'] }}', '${{ parameters.rootBranchName }}'))
       
-    - template: ..\Steps\BuildAndTest.yml
+    - template: ../Steps/BuildAndTest.yml
       parameters:
         azureArtifactsFeed: ${{ parameters.azureArtifactsFeed }}
         buildConfiguration: ${{ parameters.buildConfiguration }}
