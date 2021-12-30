@@ -35,12 +35,14 @@ jobs:
   pool: ${{ parameters.pool }}
   steps:
   - task: DownloadPipelineArtifact@2
-    inputs:
-      artifact: Packages
+    # inputs:
+    #   source: current
+    #   #artifact: Packages
 
-  - task: DownloadPipelineArtifact@2
-    inputs:
-      artifact: Symbols      
+  # - task: DownloadPipelineArtifact@2
+  #   inputs:
+  #     buildType: current
+  #     artifact: Symbols      
   #- download: current
     #artifact: WebApp
     #patterns: |
