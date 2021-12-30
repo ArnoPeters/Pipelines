@@ -55,7 +55,7 @@ steps:
     runSettingsFile: ${{ parameters.runSettingsFile }}
 
 - task: CopyFiles@2
-  displayname: Collect *.pdb for 'Symbols' artifact
+  displayName: Collect *.pdb for 'Symbols' artifact
   inputs:
     #sourceFolder: # Optional
     contents: '**/bin/**/*.pdb' 
@@ -65,7 +65,7 @@ steps:
   artifact: Symbols
 
 - task: CopyFiles@2
-  displayname: Collect *.nupgk for 'Package' artifact
+  displayName: Collect *.nupgk for 'Package' artifact
   inputs:
     #sourceFolder: # Optional
     contents: '$(System.DefaultWorkingDirectory)/src/**/*.nupkg' 
