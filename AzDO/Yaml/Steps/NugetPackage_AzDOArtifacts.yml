@@ -47,7 +47,7 @@ steps:
 - ${{ parameters.steps }}
 
 - script: |
-    git tag -a "v$(Gitversion.MajorMinorPatch)" -m "Release of Nuget package"
+    git tag v$(Gitversion.MajorMinorPatch)
     git push origin "v$(Gitversion.MajorMinorPatch)"
   condition: and(succeeded(), eq('${{ variables['Build.SourceBranch'] }}', '${{ parameters.rootBranchName }}'))
   workingDirectory: $(Build.SourcesDirectory)
