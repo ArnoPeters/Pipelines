@@ -1,4 +1,5 @@
-# Variables to be included in an Azure Devops YAML-based pipeline
+# Variables meant for consistency and reuse in multiple YAML-based pipelines. 
+# For example: include these in several pipelines within the same Azure Devops organisation or team project so they can be picked up and set for all projects in a build using Directory.Build.Props
 variables:
   - name: company
     value: ''  
