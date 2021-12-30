@@ -1,0 +1,95 @@
+# Full workflow for creating a pipeline in Azure Devops to create nuget packages from an Azure Devops Git repo, to be published to Azure Devops Artifacts. 
+# Features: 
+#   - Pre-release on Pull Request
+#   - Full release when a Pull Request is accepted and merged
+#   - Gitversion is used for automatic semantic versioning
+#   - Outputs debug symbols and uses Source Link to provide step-into-package-code during debugging
+#
+# Best used in combination with the template nuget package (TODO: link)
+#
+# Prerequisites: 
+# The Project Collection Build Server ACCOUNT - not the GROUP needs the following permissions: 
+# - Tag
+# - Contribute
+# These can be set by going to Manage Repositories -> All repositories -> Security
+# Azure Devops Marketplace tasks required to use this template. 
+# Please check them for further prerequisites and permission settings.
+# - https://marketplace.visualstudio.com/items?itemName=gittools.gittools)
+
+parameters:
+- name: azureArtifactsFeed
+- name: 'buildConfiguration'
+  default: "Release"
+  type: string
+- name: 'rootBranchName'
+  type: string
+- name: 'runSettingsFile'
+  type: string
+- name: 'gitVersionConfigFilePath'
+  type: string  
+  default: 'GitVersion.yml'
+- name: 'pdbArtifactName'
+  type: string  
+  default: ''
+- name: 'pdbFilter'
+  type: string  
+  default: '**/bin/**/*.pdb'
+
+steps:
+- checkout: self
+  displayName: "Checkout repository including submodules"
+  submodules: true
+  persistCredentials: true
+
+- template: ../Steps/ComputeGitVersion.yml
+  parameters:
+    gitVersionConfigFilePath: ${{ parameters.gitVersionConfigFilePath }}
+    rootBranchName: ${{ parameters.rootBranchName }}
+
+- template: ../Steps/BuildAndTest.yml
+  parameters:
+    azureArtifactsFeed: ${{ parameters.azureArtifactsFeed }}
+    buildConfiguration: ${{ parameters.buildConfiguration }}
+    runSettingsFile: ${{ parameters.runSettingsFile }}
+
+- script: |
+    git tag -a "v$(Gitversion.MajorMinorPatch)" -m "Release of Nuget package"
+    git push origin "v$(Gitversion.MajorMinorPatch)"
+  condition: and(succeeded(), eq('${{ variables['Build.SourceBranch'] }}', '${{ parameters.rootBranchName }}'))
+  workingDirectory: $(Build.SourcesDirectory)
+  displayName: Versioning - Tag commit on release
+
+- ${{ if parameters.pdbArtifactName }}:
+  - task: CopyFiles@2
+    displayName: Symbols - Collect ${{ parameters.pdbFilter }} for '${{ parameters.pdbArtifactName }}' artifact
+    inputs:
+      contents: '${{ parameters.pdbFilter }}' 
+      targetFolder: '$(Build.ArtifactStagingDirectory)/${{ parameters.pdbArtifactName }}'
+      flattenFolders: true
+
+- ${{ if parameters.pdbArtifactName }}:
+  - task: PublishPipelineArtifact@1
+    displayName: Symbols - Publish '${{ parameters.pdbArtifactName }}' artifact
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)/${{ parameters.pdbArtifactName }}'
+      artifactName: '${{ parameters.pdbArtifactName }}'
+
+# - task: CopyFiles@2
+#   displayName: Collect *.snupkg for 'Symbol packages' artifact
+#   inputs:
+#     contents: '$(System.DefaultWorkingDirectory)/src/**/*.snupkg' 
+#     targetFolder: '$(Build.ArtifactStagingDirectory)/SymbolPackages'
+#     flattenFolders: true
+
+# - task: PublishPipelineArtifact@1
+#   displayName: Publish 'Symbol packages' artifact
+#   inputs:
+#     targetPath: '$(Build.ArtifactStagingDirectory)/SymbolPackages'
+#     artifactName: SymbolPackages
+
+- task: DotNetCoreCLI@2
+  displayName: 'NuGet - Push package(s) to [${{ parameters.azureArtifactsFeed }}]'
+  inputs:
+    command: push
+    packagesToPush: '$(System.DefaultWorkingDirectory)/src/**/*.nupkg'
+    publishVstsFeed: '${{ parameters.azureArtifactsFeed }}'

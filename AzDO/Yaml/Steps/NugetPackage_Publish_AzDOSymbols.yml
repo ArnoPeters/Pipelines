@@ -1,0 +1,48 @@
+# Publishes *.pdb symbol files to the Azure Devops artifacts. 
+# This requires a windows pipeline, as the symbol publishing task from Microsoft will not run on linux (yet)
+# See https://github.com/microsoft/azure-pipelines-tasks/issues/5919 - it seems to be closed, but it also does not work (?). 
+#
+# Connecting: 
+# - Visual Studio -> add symbol server
+# - Setup downloading symbols
+#
+#
+
+parameters:
+- name: 'pdbArtifactName'
+  type: string  
+- name: DependsOn
+  type: object
+- name: 'pool'
+  type: object
+  default: {
+    vmImage: 'windows-latest'
+  }
+
+jobs:
+- job: PublishAzDO
+  dependsOn: ${{ parameters.DependsOn }}
+  condition: succeeded()
+  displayName: Publish Symbols to Azure Devops Artifacts
+  pool: ${{ parameters.pool }}
+  steps:
+  
+  - checkout: none
+    displayName: "SKIP - checkout code is not required"
+
+  # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/utility/download-pipeline-artifact?view=azure-devops
+  - task: DownloadPipelineArtifact@2
+    displayName: "Download Artifact - '${{ parameters.pdbArtifactName }}'"
+    inputs:
+      downloadPath: '$(Pipeline.Workspace)'
+      buildType: current
+      artifact: ${{ parameters.pdbArtifactName }}      
+
+  # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/build/index-sources-publish-symbols?view=azure-devops
+  - task: PublishSymbols@2
+    displayName: 'Symbols - Upload *.pdb to Azure Devops Artifacts'
+    inputs:
+      symbolsFolder: '$(Pipeline.Workspace)'
+      searchPattern: '**\*.pdb'
+      indexSources: false
+      SymbolServerType: 'TeamServices'

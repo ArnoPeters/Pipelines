@@ -7,9 +7,14 @@
 #
 # Best used in combination with the template nuget package (TODO: link)
 #
-# Azure Devops Marketplace tasks required to use this template: 
+# Prerequisites: 
+# The Project Collection Build Server ACCOUNT - not the GROUP needs the following permissions: 
+# - Tag
+# - Contribute
+# These can be set by going to Manage Repositories -> All repositories -> Security
+# Azure Devops Marketplace tasks required to use this template. 
+# Please check them for further prerequisites and permission settings.
 # - https://marketplace.visualstudio.com/items?itemName=gittools.gittools)
-# - https://marketplace.visualstudio.com/items?itemName=ATP.ATP-GitTag
 
 parameters:
 - name: azureArtifactsFeed
@@ -26,7 +31,7 @@ parameters:
 - name: 'gitVersionConfigFilePath'
   type: string  
   default: "GitVersion.yml"
-  
+
 stages:
 - stage: Build
   displayName: Build and Publish nuget package 
@@ -41,19 +46,19 @@ stages:
       submodules: true
       persistCredentials: true
 
-    - template: ..\Steps\ComputeGitVersion.yml
+    - template: ../Steps/ComputeGitVersion.yml
       parameters:
         gitVersionConfigFilePath: ${{ parameters.gitVersionConfigFilePath }}
         rootBranchName: ${{ parameters.rootBranchName }}
     
-    - task: ATP.ATP-GitTag.GitTag.GitTag@6
-      displayName: 'Versioning - Tag commit on release'
-      inputs:
-        tag: 'v$(Gitversion.MajorMinorPatch)'
-        tagMessage: 'Release of Nuget package'
+    - script: |
+        git tag -a "v$(Gitversion.MajorMinorPatch)" -m "Release of Nuget package"
+        git push origin "v$(Gitversion.MajorMinorPatch)"
       condition: and(succeeded(), eq('${{ variables['Build.SourceBranch'] }}', '${{ parameters.rootBranchName }}'))
-      
-    - template: ..\Steps\BuildAndTest.yml
+      workingDirectory: $(Build.SourcesDirectory)
+      displayName: Versioning - Tag commit on release
+
+    - template: ../Steps/BuildAndTest.yml
       parameters:
         azureArtifactsFeed: ${{ parameters.azureArtifactsFeed }}
         buildConfiguration: ${{ parameters.buildConfiguration }}
@@ -65,7 +70,6 @@ stages:
         command: push
         packagesToPush: '$(System.DefaultWorkingDirectory)/src/**/*.nupkg'
         publishVstsFeed: '${{ parameters.azureArtifactsFeed }}'
-
 
     - task: PublishSymbols@2
       displayName: 'Nuget - Publish symbols to artifacts'
