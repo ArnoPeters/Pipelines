@@ -9,9 +9,8 @@
 #
 
 parameters:
-- name: SymbolsArtifactName
-  type: string
-  default: 'Symbols'
+- name: 'pdbArtifactName'
+  type: string  
 - name: DependsOn
   type: object
 - name: 'pool'
@@ -33,17 +32,17 @@ jobs:
 
   # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/utility/download-pipeline-artifact?view=azure-devops
   - task: DownloadPipelineArtifact@2
-    displayName: "Download Artifact - '${{ parameters.SymbolsArtifactName }}'"
+    displayName: "Download Artifact - '${{ parameters.pdbArtifactName }}'"
     inputs:
       path: '$(Pipeline.Workspace)'
       buildType: current
-      artifact: ${{ parameters.SymbolsArtifactName }}      
+      artifact: ${{ parameters.pdbArtifactName }}      
 
   # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/utility/download-pipeline-artifact?view=azure-devops
   - task: PublishSymbols@2
     displayName: 'Symbols - Publish *.pdb to Azure Devops Artifacts'
     inputs:
-      symbolsFolder: '$(Pipeline.Workspace)/${{ parameters.SymbolsArtifactName }}'
+      symbolsFolder: '$(Pipeline.Workspace)/${{ parameters.pdbArtifactName }}'
       SearchPattern: '**/*.pdb'
       IndexSources: false
       SymbolServerType: 'TeamServices'

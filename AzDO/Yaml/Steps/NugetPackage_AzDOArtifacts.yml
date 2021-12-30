@@ -27,7 +27,13 @@ parameters:
   type: string
 - name: 'gitVersionConfigFilePath'
   type: string  
-  default: "GitVersion.yml"
+  default: 'GitVersion.yml'
+- name: 'pdbArtifactName'
+  type: string  
+  default: ''
+- name: 'pdbFilter'
+  type: string  
+  default: '**/bin/**/*.pdb'
 
 steps:
 - checkout: self
@@ -53,18 +59,20 @@ steps:
   workingDirectory: $(Build.SourcesDirectory)
   displayName: Versioning - Tag commit on release
 
-- task: CopyFiles@2
-  displayName: Collect *.pdb for 'Symbols' artifact
-  inputs:
-    contents: '**/bin/**/*.pdb' 
-    targetFolder: '$(Build.ArtifactStagingDirectory)/Symbols'
-    flattenFolders: true
+- ${{ if parameters.pdbArtifactName }}:
+  - task: CopyFiles@2
+    displayName: Symbols - Collect ${{ parameters.pdbFilter }} for '${{ parameters.pdbArtifactName }}' artifact
+    inputs:
+      contents: '${{ parameters.pdbFilter }}' 
+      targetFolder: '$(Build.ArtifactStagingDirectory)/${{ parameters.pdbArtifactName }}'
+      flattenFolders: true
 
-- task: PublishPipelineArtifact@1
-  displayName: Publish 'Symbols' artifact
-  inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)/Symbols'
-    artifactName: Symbols
+- ${{ if parameters.pdbArtifactName }}:
+  - task: PublishPipelineArtifact@1
+    displayName: Symbols - Publish '${{ parameters.pdbArtifactName }}' artifact
+    inputs:
+      targetPath: '$(Build.ArtifactStagingDirectory)/${{ parameters.pdbArtifactName }}'
+      artifactName: Symbols
 
 # - task: CopyFiles@2
 #   displayName: Collect *.snupkg for 'Symbol packages' artifact
