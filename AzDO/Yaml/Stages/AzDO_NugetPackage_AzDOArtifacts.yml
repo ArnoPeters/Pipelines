@@ -48,8 +48,8 @@ stages:
         rootBranchName: ${{ parameters.rootBranchName }}
     
     - script: |
-        git tag -a 'v$(Gitversion.MajorMinorPatch)' -m 'Release of Nuget package'
-        git push origin 'v$(Gitversion.MajorMinorPatch)'
+        git tag -a "v$(Gitversion.MajorMinorPatch)" -m "Release of Nuget package"
+        git push origin "v$(Gitversion.MajorMinorPatch)"
       condition: and(succeeded(), eq('${{ variables['Build.SourceBranch'] }}', '${{ parameters.rootBranchName }}'))
       workingDirectory: $(Build.SourcesDirectory)
     
