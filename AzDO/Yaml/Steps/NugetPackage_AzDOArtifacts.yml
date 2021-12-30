@@ -18,30 +18,20 @@
 
 parameters:
 - name: azureArtifactsFeed
-- name: 'buildConfiguration'
-  default: "Release"
+- name: rootBranchName
   type: string
-- name: 'rootBranchName'
-  type: string
-- name: 'runSettingsFile'
-  type: string
-- name: 'gitVersionConfigFilePath'
+- name: gitVersionConfigFilePath
   type: string  
   default: 'GitVersion.yml'
-- name: 'pdbArtifactName'
+- name: pdbArtifactName
   type: string  
   default: ''
-- name: 'pdbFilter'
+- name: pdbFilter
   type: string  
   default: '**/bin/**/*.pdb'
-- name: 'steps'
+- name: steps
   type: stepList
-  default: 
-  - template: ../Steps/BuildAndTest.yml
-    parameters:
-      azureArtifactsFeed: ${{ parameters.azureArtifactsFeed }}
-      buildConfiguration: ${{ parameters.buildConfiguration }}
-      runSettingsFile: ${{ parameters.runSettingsFile }}
+  default: []
 
 steps:
 - checkout: self
