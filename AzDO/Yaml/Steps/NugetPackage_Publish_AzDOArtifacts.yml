@@ -37,8 +37,12 @@ jobs:
     clean: all
   steps:
   - task: DownloadPipelineArtifact@2
-    #inputs:
-    #  artifact: WebApp
+    inputs:
+      artifact: Packages
+      
+  - task: DownloadPipelineArtifact@2
+    inputs:
+      artifact: Symbols      
   #- download: current
     #artifact: WebApp
     #patterns: |
