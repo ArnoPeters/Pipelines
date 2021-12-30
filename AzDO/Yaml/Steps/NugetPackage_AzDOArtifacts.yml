@@ -41,12 +41,12 @@ steps:
     gitVersionConfigFilePath: ${{ parameters.gitVersionConfigFilePath }}
     rootBranchName: ${{ parameters.rootBranchName }}
 
-- script: |
-    git tag -a "v$(Gitversion.MajorMinorPatch)" -m "Release of Nuget package"
-    git push origin "v$(Gitversion.MajorMinorPatch)"
-  condition: and(succeeded(), eq('${{ variables['Build.SourceBranch'] }}', '${{ parameters.rootBranchName }}'))
-  workingDirectory: $(Build.SourcesDirectory)
-  displayName: Versioning - Tag commit on release
+# - script: |
+#     git tag -a "v$(Gitversion.MajorMinorPatch)" -m "Release of Nuget package"
+#     git push origin "v$(Gitversion.MajorMinorPatch)"
+#   condition: and(succeeded(), eq('${{ variables['Build.SourceBranch'] }}', '${{ parameters.rootBranchName }}'))
+#   workingDirectory: $(Build.SourcesDirectory)
+#   displayName: Versioning - Tag commit on release
 
 - template: ../Steps/BuildAndTest.yml
   parameters:
@@ -54,12 +54,32 @@ steps:
     buildConfiguration: ${{ parameters.buildConfiguration }}
     runSettingsFile: ${{ parameters.runSettingsFile }}
 
-- task: DotNetCoreCLI@2
-  displayName: 'NuGet - Push package(s) to [${{ parameters.azureArtifactsFeed }}]'
+- task: CopyFiles@2
+  displayname: Collect *.pdb for 'Symbols' artifact
   inputs:
-    command: push
-    packagesToPush: '$(System.DefaultWorkingDirectory)/src/**/*.nupkg'
-    publishVstsFeed: '${{ parameters.azureArtifactsFeed }}'
+    #sourceFolder: # Optional
+    contents: '**/bin/**/*.pdb' 
+    targetFolder: '$(Build.ArtifactStagingDirectory)/Symbols'
+
+- publish: '$(Build.ArtifactStagingDirectory)/Symbols'
+  artifact: Symbols
+
+- task: CopyFiles@2
+  displayname: Collect *.nupgk for 'Package' artifact
+  inputs:
+    #sourceFolder: # Optional
+    contents: '$(System.DefaultWorkingDirectory)/src/**/*.nupkg' 
+    targetFolder: '$(Build.ArtifactStagingDirectory)/Package'
+
+- publish: '$(Build.ArtifactStagingDirectory)/Package'
+  artifact: Package
+
+# - task: DotNetCoreCLI@2
+#   displayName: 'NuGet - Push package(s) to [${{ parameters.azureArtifactsFeed }}]'
+#   inputs:
+#     command: push
+#     packagesToPush: '$(System.DefaultWorkingDirectory)/src/**/*.nupkg'
+#     publishVstsFeed: '${{ parameters.azureArtifactsFeed }}'
 
 # - task: PublishSymbols@2
 #   displayName: 'Nuget - Publish symbols to artifacts'
