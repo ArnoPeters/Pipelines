@@ -34,6 +34,14 @@ parameters:
 - name: 'pdbFilter'
   type: string  
   default: '**/bin/**/*.pdb'
+- name: 'steps'
+  type: stepList
+  default: 
+  - template: ../Steps/BuildAndTest.yml
+    parameters:
+      azureArtifactsFeed: ${{ parameters.azureArtifactsFeed }}
+      buildConfiguration: ${{ parameters.buildConfiguration }}
+      runSettingsFile: ${{ parameters.runSettingsFile }}
 
 steps:
 - checkout: self
@@ -46,11 +54,7 @@ steps:
     gitVersionConfigFilePath: ${{ parameters.gitVersionConfigFilePath }}
     rootBranchName: ${{ parameters.rootBranchName }}
 
-- template: ../Steps/BuildAndTest.yml
-  parameters:
-    azureArtifactsFeed: ${{ parameters.azureArtifactsFeed }}
-    buildConfiguration: ${{ parameters.buildConfiguration }}
-    runSettingsFile: ${{ parameters.runSettingsFile }}
+- ${{ parameters.steps }}
 
 - script: |
     git tag -a "v$(Gitversion.MajorMinorPatch)" -m "Release of Nuget package"
