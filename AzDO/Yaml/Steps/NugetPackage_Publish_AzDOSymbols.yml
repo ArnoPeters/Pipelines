@@ -38,7 +38,7 @@ jobs:
       buildType: current
       artifact: ${{ parameters.pdbArtifactName }}      
 
-  # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/utility/download-pipeline-artifact?view=azure-devops
+  # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/build/index-sources-publish-symbols?view=azure-devops
   - task: PublishSymbols@2
     displayName: 'Symbols - Upload *.pdb to Azure Devops Artifacts'
     inputs:
