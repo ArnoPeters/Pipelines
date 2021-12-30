@@ -31,15 +31,19 @@ jobs:
   - checkout: none
     displayName: "SKIP - checkout code is not required"
 
+  # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/utility/download-pipeline-artifact?view=azure-devops
   - task: DownloadPipelineArtifact@2
     displayName: "Download Artifact - '${{ parameters.SymbolsArtifactName }}'"
     inputs:
+      path: '$(Pipeline.Workspace)'
       buildType: current
       artifact: ${{ parameters.SymbolsArtifactName }}      
 
+  # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/utility/download-pipeline-artifact?view=azure-devops
   - task: PublishSymbols@2
     displayName: 'Symbols - Publish *.pdb to Azure Devops Artifacts'
     inputs:
-      SearchPattern: '../**/*.pdb'
+      symbolsFolder: '$(Pipeline.Workspace)/${{ parameters.SymbolsArtifactName }}'
+      SearchPattern: '../*.pdb'
       IndexSources: false
       SymbolServerType: 'TeamServices'
