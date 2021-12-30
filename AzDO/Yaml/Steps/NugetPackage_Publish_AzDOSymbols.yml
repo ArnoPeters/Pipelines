@@ -34,7 +34,7 @@ jobs:
   - task: DownloadPipelineArtifact@2
     displayName: "Download Artifact - '${{ parameters.pdbArtifactName }}'"
     inputs:
-      path: '$(Pipeline.Workspace)\${{ parameters.pdbArtifactName }}'
+      downloadPath: '$(Pipeline.Workspace)'
       buildType: current
       artifact: ${{ parameters.pdbArtifactName }}      
 
@@ -42,7 +42,7 @@ jobs:
   - task: PublishSymbols@2
     displayName: 'Symbols - Upload *.pdb to Azure Devops Artifacts'
     inputs:
-      symbolsFolder: '$(Pipeline.Workspace)\${{ parameters.pdbArtifactName }}'
-      SearchPattern: '**\*.pdb'
-      IndexSources: false
+      symbolsFolder: '$(Pipeline.Workspace)'
+      searchPattern: '**\*.pdb'
+      indexSources: false
       SymbolServerType: 'TeamServices'
