@@ -43,7 +43,7 @@ jobs:
   - task: PublishSymbols@2
     displayName: 'Symbols - Publish *.pdb to Azure Devops Artifacts'
     inputs:
-      symbolsFolder: '$(Pipeline.Workspace)'
+      symbolsFolder: '$(Pipeline.Workspace)/${{ parameters.SymbolsArtifactName }}'
       SearchPattern: '**/*.pdb'
       IndexSources: false
       SymbolServerType: 'TeamServices'
