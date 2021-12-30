@@ -30,7 +30,7 @@ parameters:
 
 jobs:
 - job: PublishAzDO
-  displayname: Publish package to Azure Devops Artifacts
+  displayName: Publish package to Azure Devops Artifacts
   pool: ${{ parameters.pool }}
   workspace:
     clean: all
