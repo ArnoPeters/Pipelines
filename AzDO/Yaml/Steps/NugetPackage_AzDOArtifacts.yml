@@ -61,9 +61,9 @@ steps:
     packagesToPush: '$(System.DefaultWorkingDirectory)/src/**/*.nupkg'
     publishVstsFeed: '${{ parameters.azureArtifactsFeed }}'
 
-- task: PublishSymbols@2
-  displayName: 'Nuget - Publish symbols to artifacts'
-  inputs:
-    SearchPattern: '**/bin/**/*.pdb'
-    IndexSources: false
-    SymbolServerType: 'TeamServices'
+# - task: PublishSymbols@2
+#   displayName: 'Nuget - Publish symbols to artifacts'
+#   inputs:
+#     SearchPattern: '**/bin/**/*.pdb'
+#     IndexSources: false
+#     SymbolServerType: 'TeamServices'
