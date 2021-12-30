@@ -36,11 +36,14 @@ jobs:
   workspace:
     clean: all
   steps:
-  - download: current
+  - task: DownloadPipelineArtifact@2
+    #inputs:
+    #  artifact: WebApp
+  #- download: current
     #artifact: WebApp
     #patterns: |
     #  **/*.pdb
-    
+
   #get pipeline artifact
   - checkout: none
     displayName: "Checkout repository including submodules"
