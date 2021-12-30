@@ -20,29 +20,32 @@ parameters:
   }
 
 jobs:
-- job: PublishAzDO
+- deployment: PublishAzDO
   dependsOn: ${{ parameters.DependsOn }}
   condition: succeeded()
   displayName: Publish Symbols to Azure Devops Artifacts
   pool: ${{ parameters.pool }}
-  steps:
-  
-  - checkout: none
-    displayName: "SKIP - checkout code is not required"
+  strategy:
+    runOnce:    #rolling, canary are the other strategies that are supported
+      deploy:
+        steps:
+        
+        # - checkout: none
+        #   displayName: "SKIP - checkout code is not required"
 
-  # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/utility/download-pipeline-artifact?view=azure-devops
-  - task: DownloadPipelineArtifact@2
-    displayName: "Download Artifact - '${{ parameters.pdbArtifactName }}'"
-    inputs:
-      downloadPath: '$(Pipeline.Workspace)'
-      buildType: current
-      artifact: ${{ parameters.pdbArtifactName }}      
+        # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/utility/download-pipeline-artifact?view=azure-devops
+        - task: DownloadPipelineArtifact@2
+          displayName: "Download Artifact - '${{ parameters.pdbArtifactName }}'"
+          inputs:
+            downloadPath: '$(Pipeline.Workspace)'
+            buildType: current
+            artifact: ${{ parameters.pdbArtifactName }}      
 
-  # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/build/index-sources-publish-symbols?view=azure-devops
-  - task: PublishSymbols@2
-    displayName: 'Symbols - Upload *.pdb to Azure Devops Artifacts'
-    inputs:
-      symbolsFolder: '$(Pipeline.Workspace)'
-      searchPattern: '**\*.pdb'
-      indexSources: false
-      SymbolServerType: 'TeamServices'
+        # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/build/index-sources-publish-symbols?view=azure-devops
+        - task: PublishSymbols@2
+          displayName: 'Symbols - Upload *.pdb to Azure Devops Artifacts'
+          inputs:
+            symbolsFolder: '$(Pipeline.Workspace)'
+            searchPattern: '**\*.pdb'
+            indexSources: false
+            SymbolServerType: 'TeamServices'
