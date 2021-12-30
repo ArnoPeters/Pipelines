@@ -41,18 +41,21 @@ steps:
     gitVersionConfigFilePath: ${{ parameters.gitVersionConfigFilePath }}
     rootBranchName: ${{ parameters.rootBranchName }}
 
-# - script: |
-#     git tag -a "v$(Gitversion.MajorMinorPatch)" -m "Release of Nuget package"
-#     git push origin "v$(Gitversion.MajorMinorPatch)"
-#   condition: and(succeeded(), eq('${{ variables['Build.SourceBranch'] }}', '${{ parameters.rootBranchName }}'))
-#   workingDirectory: $(Build.SourcesDirectory)
-#   displayName: Versioning - Tag commit on release
+
 
 - template: ../Steps/BuildAndTest.yml
   parameters:
     azureArtifactsFeed: ${{ parameters.azureArtifactsFeed }}
     buildConfiguration: ${{ parameters.buildConfiguration }}
     runSettingsFile: ${{ parameters.runSettingsFile }}
+
+- script: |
+    git tag -a "v$(Gitversion.MajorMinorPatch)" -m "Release of Nuget package"
+    git push origin "v$(Gitversion.MajorMinorPatch)"
+  condition: and(succeeded(), eq('${{ variables['Build.SourceBranch'] }}', '${{ parameters.rootBranchName }}'))
+  workingDirectory: $(Build.SourcesDirectory)
+  displayName: Versioning - Tag commit on release
+
 
 - task: CopyFiles@2
   displayName: Collect *.pdb for 'Symbols' artifact
@@ -68,19 +71,19 @@ steps:
     targetPath: '$(Build.ArtifactStagingDirectory)/Symbols'
     artifactName: Symbols
 
-- task: CopyFiles@2
-  displayName: Collect *.nupgk for 'Packages' artifact
-  inputs:
-    #sourceFolder: # Optional
-    contents: '$(System.DefaultWorkingDirectory)/src/**/*.nupkg' 
-    targetFolder: '$(Build.ArtifactStagingDirectory)/Packages'
-    flattenFolders: true
+# - task: CopyFiles@2
+#   displayName: Collect *.nupgk for 'Packages' artifact
+#   inputs:
+#     #sourceFolder: # Optional
+#     contents: '$(System.DefaultWorkingDirectory)/src/**/*.nupkg' 
+#     targetFolder: '$(Build.ArtifactStagingDirectory)/Packages'
+#     flattenFolders: true
 
-- task: PublishPipelineArtifact@1
-  displayName: Publish 'Packages' artifact
-  inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)/Packages'
-    artifactName: Packages
+# - task: PublishPipelineArtifact@1
+#   displayName: Publish 'Packages' artifact
+#   inputs:
+#     targetPath: '$(Build.ArtifactStagingDirectory)/Packages'
+#     artifactName: Packages
 
 
 # - task: DotNetCoreCLI@2

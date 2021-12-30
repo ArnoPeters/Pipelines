@@ -17,11 +17,9 @@
 # - https://marketplace.visualstudio.com/items?itemName=gittools.gittools)
 
 parameters:
-- name: azureArtifactsFeed
-- name: 'packageVersion' #Gitversion.MajorMinorPatch
+- name: SymbolsArtifactName
   type: string
-- name: 'rootBranchName'
-  type: string
+  default: 'Symbols'
 - name: DependsOn
   type: object
 - name: 'pool'
@@ -41,22 +39,22 @@ jobs:
   - checkout: none
     displayName: "Get GIT credentials?"
     # submodules: true
-    persistCredentials: true
+    #persistCredentials: true
 
-  - task: Bash@3
-    inputs:
-      targetType: 'inline'
-      script: 'env | sort'
+  # - task: Bash@3
+  #   inputs:
+  #     targetType: 'inline'
+  #     script: 'env | sort'
+
+  # - task: DownloadPipelineArtifact@2
+  #   inputs:
+  #     buildType: current
+  #     artifact: Packages
 
   - task: DownloadPipelineArtifact@2
     inputs:
       buildType: current
-      artifact: Packages
-
-  - task: DownloadPipelineArtifact@2
-    inputs:
-      buildType: current
-      artifact: Symbols      
+      artifact: ${{ parameters.SymbolsArtifactName }}      
   #- download: current
     #artifact: WebApp
     #patterns: |
@@ -64,19 +62,19 @@ jobs:
 
 
 
-  - script: |
-      git tag -a "v${{ parameters.rootBranchName }}" -m "Release of Nuget package"
-      git push origin "v${{ parameters.rootBranchName }}"
-    condition: and(succeeded(), eq('${{ variables['Build.SourceBranch'] }}', '${{ parameters.rootBranchName }}'))
-    workingDirectory: $(Build.SourcesDirectory)
-    displayName: Versioning - Tag commit on release
+  # - script: |
+  #     git tag -a "v${{ parameters.rootBranchName }}" -m "Release of Nuget package"
+  #     git push origin "v${{ parameters.rootBranchName }}"
+  #   condition: and(succeeded(), eq('${{ variables['Build.SourceBranch'] }}', '${{ parameters.rootBranchName }}'))
+  #   workingDirectory: $(Build.SourcesDirectory)
+  #   displayName: Versioning - Tag commit on release
 
-  - task: DotNetCoreCLI@2
-    displayName: 'NuGet - Push package(s) to [${{ parameters.azureArtifactsFeed }}]'
-    inputs:
-      command: push
-      packagesToPush: '../**/*.nupkg'
-      publishVstsFeed: '${{ parameters.azureArtifactsFeed }}'
+  # - task: DotNetCoreCLI@2
+  #   displayName: 'NuGet - Push package(s) to [${{ parameters.azureArtifactsFeed }}]'
+  #   inputs:
+  #     command: push
+  #     packagesToPush: '../**/*.nupkg'
+  #     publishVstsFeed: '${{ parameters.azureArtifactsFeed }}'
 
   - task: PublishSymbols@2
     displayName: 'Nuget - Publish symbols to artifacts'
