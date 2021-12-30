@@ -66,18 +66,18 @@ steps:
     targetPath: '$(Build.ArtifactStagingDirectory)/Symbols'
     artifactName: Symbols
 
-- task: CopyFiles@2
-  displayName: Collect *.snupkg for 'Symbol packages' artifact
-  inputs:
-    contents: '$(System.DefaultWorkingDirectory)/src/**/*.snupkg' 
-    targetFolder: '$(Build.ArtifactStagingDirectory)/SymbolPackages'
-    flattenFolders: true
+# - task: CopyFiles@2
+#   displayName: Collect *.snupkg for 'Symbol packages' artifact
+#   inputs:
+#     contents: '$(System.DefaultWorkingDirectory)/src/**/*.snupkg' 
+#     targetFolder: '$(Build.ArtifactStagingDirectory)/SymbolPackages'
+#     flattenFolders: true
 
-- task: PublishPipelineArtifact@1
-  displayName: Publish 'Symbol packages' artifact
-  inputs:
-    targetPath: '$(Build.ArtifactStagingDirectory)/SymbolPackages'
-    artifactName: SymbolPackages
+# - task: PublishPipelineArtifact@1
+#   displayName: Publish 'Symbol packages' artifact
+#   inputs:
+#     targetPath: '$(Build.ArtifactStagingDirectory)/SymbolPackages'
+#     artifactName: SymbolPackages
 
 - task: DotNetCoreCLI@2
   displayName: 'NuGet - Push package(s) to [${{ parameters.azureArtifactsFeed }}]'
