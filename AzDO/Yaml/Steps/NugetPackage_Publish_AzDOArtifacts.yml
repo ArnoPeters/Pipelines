@@ -61,7 +61,7 @@ jobs:
     displayName: 'NuGet - Push package(s) to [${{ parameters.azureArtifactsFeed }}]'
     inputs:
       command: push
-      packagesToPush: '**/*.nupkg'
+      packagesToPush: '../**/*.nupkg'
       publishVstsFeed: '${{ parameters.azureArtifactsFeed }}'
 
   - task: PublishSymbols@2
