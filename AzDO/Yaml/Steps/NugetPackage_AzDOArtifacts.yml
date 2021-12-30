@@ -69,7 +69,7 @@ steps:
     artifactName: Symbols
 
 - task: CopyFiles@2
-  displayName: Collect *.nupgk for 'Package' artifact
+  displayName: Collect *.nupgk for 'Packages' artifact
   inputs:
     #sourceFolder: # Optional
     contents: '$(System.DefaultWorkingDirectory)/src/**/*.nupkg' 
@@ -77,7 +77,7 @@ steps:
     flattenFolders: true
 
 - task: PublishPipelineArtifact@1
-  displayName: Publish 'Package' artifact
+  displayName: Publish 'Packages' artifact
   inputs:
     targetPath: '$(Build.ArtifactStagingDirectory)/Packages'
     artifactName: Packages
