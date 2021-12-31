@@ -50,7 +50,7 @@ parameters:
   }
 
 jobs:
-- template: AzDO/Yaml/Jobs/NugetPackage_AzDOArtifacts.yml@templates
+- template: NugetPackage_AzDOArtifacts.yml@templates
   parameters:
     buildJobName: ${{ parameters.buildJobName }}
     dependsOn: ${{ parameters.DependsOn }}
@@ -63,7 +63,7 @@ jobs:
     pdbFilter: ${{ parameters.pdbFilter }}
     buildSteps: ${{ parameters.buildSteps }}
 
-- template: AzDO/Yaml/Jobs/PdbArtifact_Publish_Symbols_AzDO.yml@templates
+- template: PdbArtifact_Publish_Symbols_AzDO.yml@templates
   parameters:
     DependsOn: ${{ parameters.buildJobName }}
     pdbArtifactName: ${{ parameters.pdbArtifactName }}    
