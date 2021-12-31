@@ -63,7 +63,7 @@ jobs:
     pdbFilter: ${{ parameters.pdbFilter }}
     buildSteps: ${{ parameters.buildSteps }}
 
-- template: PdbArtifact_Publish_Symbols_AzDO.yml@templates
+- template: PdbArtifact_Publish_Symbols_AzDOArtifacts.yml@templates
   parameters:
     DependsOn: ${{ parameters.buildJobName }}
     pdbArtifactName: ${{ parameters.pdbArtifactName }}    
