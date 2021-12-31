@@ -20,7 +20,7 @@ parameters:
 - name: azureArtifactsFeed
 - name: buildSteps
   type: stepList
-- name: DependsOn
+- name: dependsOn
   type: object
   default: []
 - name: rootBranchName
@@ -53,7 +53,7 @@ jobs:
 - template: NugetPackage_AzDOArtifacts.yml@templates
   parameters:
     buildJobName: ${{ parameters.buildJobName }}
-    dependsOn: ${{ parameters.DependsOn }}
+    dependsOn: ${{ parameters.dependsOn }}
     workspace:
       ${{ parameters.workspace }}
     gitVersionConfigFilePath: ${{ parameters.gitVersionConfigFilePath }}
@@ -65,6 +65,6 @@ jobs:
 
 - template: PdbArtifact_Publish_Symbols_AzDOArtifacts.yml@templates
   parameters:
-    DependsOn: ${{ parameters.buildJobName }}
+    dependsOn: ${{ parameters.buildJobName }}
     pdbArtifactName: ${{ parameters.pdbArtifactName }}    
     pool: ${{ parameters.windowsPool }}    

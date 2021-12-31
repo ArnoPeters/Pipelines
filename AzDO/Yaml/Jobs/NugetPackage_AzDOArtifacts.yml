@@ -21,7 +21,7 @@ parameters:
 - name: buildSteps
   type: stepList
 
-- name: DependsOn
+- name: dependsOn
   type: object
   default: []
 - name: rootBranchName
@@ -48,7 +48,7 @@ parameters:
 jobs:
 - job: ${{ parameters.buildJobName }}
   displayName: Autoversion and build Nuget package
-  dependsOn: ${{ parameters.DependsOn }}
+  dependsOn: ${{ parameters.dependsOn }}
   condition: succeeded()
   workspace:
     ${{ parameters.workspace }}

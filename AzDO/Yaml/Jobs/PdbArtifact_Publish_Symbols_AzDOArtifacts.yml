@@ -11,7 +11,7 @@
 parameters:
 - name: 'pdbArtifactName'
   type: string  
-- name: DependsOn
+- name: dependsOn
   type: object
 - name: 'pool'
   type: object
@@ -21,7 +21,7 @@ parameters:
 
 jobs:
 - job: PublishAzDO
-  dependsOn: ${{ parameters.DependsOn }}
+  dependsOn: ${{ parameters.dependsOn }}
   condition: succeeded()
   displayName: Publish Symbols to Azure Devops Artifacts
   pool: ${{ parameters.pool }}
