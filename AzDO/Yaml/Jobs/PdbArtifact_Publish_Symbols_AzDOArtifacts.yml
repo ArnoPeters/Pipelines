@@ -2,7 +2,7 @@
 # This requires a windows pipeline, as the symbol publishing task from Microsoft will not run on linux (yet)
 # See https://github.com/microsoft/azure-pipelines-tasks/issues/5919 - it seems to be closed, but it also does not work (?). 
 #
-# Connecting: 
+# (TODO) Connecting: 
 # - Visual Studio -> add symbol server
 # - Setup downloading symbols
 #

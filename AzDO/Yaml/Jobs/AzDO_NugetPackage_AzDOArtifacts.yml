@@ -8,7 +8,7 @@
 # Best used in combination with the template nuget package (TODO: link)
 #
 # Prerequisites: 
-# The Project Collection Build Server ACCOUNT - not the GROUP needs the following permissions: 
+# The Project Collection Build Server ACCOUNT - (not the GROUP!) - needs the following permissions: 
 # - Tag
 # - Contribute
 # These can be set by going to Manage Repositories -> All repositories -> Security
@@ -17,12 +17,15 @@
 # - https://marketplace.visualstudio.com/items?itemName=gittools.gittools)
 
 parameters:
+- name: azureArtifactsFeed
+- name: buildSteps
+  type: stepList
 - name: DependsOn
   type: object
   default: []
-- name: azureArtifactsFeed
 - name: rootBranchName
   type: string
+  default: 'refs/heads/main'
 - name: gitVersionConfigFilePath
   type: string  
   default: 'GitVersion.yml'
@@ -32,9 +35,6 @@ parameters:
 - name: pdbFilter
   type: string  
   default: '**/bin/**/*.pdb'
-- name: steps
-  type: stepList
-  default: []
 - name: workspace
   type: object
   default: {
@@ -43,26 +43,28 @@ parameters:
 - name: buildJobName
   type: string  
   default: 'BuildPackage'
+- name: windowsPool
+  type: object
+  default: {
+    vmImage: 'windows-latest'
+  }
 
 jobs:
-- job: ${{ parameters.buildJobName }}
-  displayName: Autoversion and build
-  dependsOn: ${{ parameters.DependsOn }}
-  condition: succeeded()
-  workspace:
-    ${{ parameters.workspace }}
-  steps:
-  - template: AzDO/Yaml/Steps/NugetPackage_AzDOArtifacts.yml@templates
-    parameters:
-      gitVersionConfigFilePath: ${{ parameters.gitVersionConfigFilePath }}
-      rootBranchName: ${{ parameters.rootBranchName }}
-      azureArtifactsFeed: ${{ parameters.azureArtifactsFeed }}
-      pdbArtifactName: ${{ parameters.pdbArtifactName }}
-      pdbFilter: ${{ parameters.pdbFilter }}
-      steps: ${{ parameters.steps }}
+- template: AzDO/Yaml/Jobs/NugetPackage_AzDOArtifacts.yml@templates
+  parameters:
+    buildJobName: ${{ parameters.buildJobName }}
+    dependsOn: ${{ parameters.DependsOn }}
+    workspace:
+      ${{ parameters.workspace }}
+    gitVersionConfigFilePath: ${{ parameters.gitVersionConfigFilePath }}
+    rootBranchName: ${{ parameters.rootBranchName }}
+    azureArtifactsFeed: ${{ parameters.azureArtifactsFeed }}
+    pdbArtifactName: ${{ parameters.pdbArtifactName }}
+    pdbFilter: ${{ parameters.pdbFilter }}
+    buildSteps: ${{ parameters.buildSteps }}
 
 - template: AzDO/Yaml/Jobs/PdbArtifact_Publish_Symbols_AzDO.yml@templates
   parameters:
     DependsOn: ${{ parameters.buildJobName }}
     pdbArtifactName: ${{ parameters.pdbArtifactName }}    
-     
+    pool: ${{ parameters.windowsPool }}    
