@@ -104,7 +104,7 @@ jobs:
 #Separate job to ensure that it is running on windows
 - ${{ if parameters.publishSymbols }}:
   - job: PublishAzDO
-    dependsOn: ${{ parameters.dependsOn }}
+    dependsOn: ${{ parameters.buildJobName }}
     condition: succeeded()
     displayName: Publish Symbols to Azure Devops Artifacts
     pool: ${{ parameters.windowsPool }}
