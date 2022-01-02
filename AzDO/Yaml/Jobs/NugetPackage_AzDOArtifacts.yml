@@ -8,7 +8,7 @@
 # Best used in combination with the template nuget package (TODO: link)
 #
 # Prerequisites: 
-# The Project Collection Build Server ACCOUNT - not the GROUP needs the following permissions: 
+# The Project Collection Build Server ACCOUNT - (not the GROUP!) - needs the following permissions: 
 # - Tag
 # - Contribute
 # These can be set by going to Manage Repositories -> All repositories -> Security
@@ -20,7 +20,6 @@ parameters:
 - name: azureArtifactsFeed
 - name: buildSteps
   type: stepList
-
 - name: dependsOn
   type: object
   default: []
@@ -30,6 +29,9 @@ parameters:
 - name: gitVersionConfigFilePath
   type: string  
   default: 'GitVersion.yml'
+- name: publishSymbols
+  type: boolean
+  default: true
 - name: pdbArtifactName
   type: string  
   default: 'PdbSymbols'
@@ -44,6 +46,11 @@ parameters:
 - name: buildJobName
   type: string  
   default: 'BuildPackage'
+- name: windowsPool
+  type: object
+  default: {
+    vmImage: 'windows-latest'
+  }
 
 jobs:
 - job: ${{ parameters.buildJobName }}
@@ -72,7 +79,7 @@ jobs:
     workingDirectory: $(Build.SourcesDirectory)
     displayName: Versioning - Tag commit on release
 
-  - ${{ if parameters.pdbArtifactName }}:
+  - ${{ if parameters.publishSymbols }}:
     - task: CopyFiles@2
       displayName: Symbols - Collect ${{ parameters.pdbFilter }} for '${{ parameters.pdbArtifactName }}' artifact
       inputs:
@@ -80,25 +87,12 @@ jobs:
         targetFolder: '$(Build.ArtifactStagingDirectory)/${{ parameters.pdbArtifactName }}'
         flattenFolders: true
 
-  - ${{ if parameters.pdbArtifactName }}:
+  - ${{ if parameters.publishSymbols }}:
     - task: PublishPipelineArtifact@1
       displayName: Symbols - Publish '${{ parameters.pdbArtifactName }}' artifact
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)/${{ parameters.pdbArtifactName }}'
         artifactName: '${{ parameters.pdbArtifactName }}'
-
-  # - task: CopyFiles@2
-  #   displayName: Collect *.snupkg for 'Symbol packages' artifact
-  #   inputs:
-  #     contents: '$(System.DefaultWorkingDirectory)/src/**/*.snupkg' 
-  #     targetFolder: '$(Build.ArtifactStagingDirectory)/SymbolPackages'
-  #     flattenFolders: true
-
-  # - task: PublishPipelineArtifact@1
-  #   displayName: Publish 'Symbol packages' artifact
-  #   inputs:
-  #     targetPath: '$(Build.ArtifactStagingDirectory)/SymbolPackages'
-  #     artifactName: SymbolPackages
 
   - task: DotNetCoreCLI@2
     displayName: 'NuGet - Push package(s) to [${{ parameters.azureArtifactsFeed }}]'
@@ -106,3 +100,31 @@ jobs:
       command: push
       packagesToPush: '$(System.DefaultWorkingDirectory)/src/**/*.nupkg'
       publishVstsFeed: '${{ parameters.azureArtifactsFeed }}'
+
+#Separate job to ensure that it is running on windows
+- ${{ if parameters.publishSymbols }}:
+  - job: PublishAzDO
+    dependsOn: ${{ parameters.dependsOn }}
+    condition: succeeded()
+    displayName: Publish Symbols to Azure Devops Artifacts
+    pool: ${{ parameters.windowsPool }}
+    steps:
+    - checkout: none
+      displayName: "SKIP - checkout code is not required"
+
+    # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/utility/download-pipeline-artifact?view=azure-devops
+    - task: DownloadPipelineArtifact@2
+      displayName: "Download Artifact - '${{ parameters.pdbArtifactName }}'"
+      inputs:
+        downloadPath: '$(Pipeline.Workspace)'
+        buildType: current
+        artifact: ${{ parameters.pdbArtifactName }}      
+
+    # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/build/index-sources-publish-symbols?view=azure-devops
+    - task: PublishSymbols@2
+      displayName: 'Symbols - Upload *.pdb to Azure Devops Artifacts'
+      inputs:
+        symbolsFolder: '$(Pipeline.Workspace)'
+        searchPattern: '**\*.pdb'
+        indexSources: false
+        SymbolServerType: 'TeamServices'
