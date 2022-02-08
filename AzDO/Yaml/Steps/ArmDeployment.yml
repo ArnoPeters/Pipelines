@@ -30,22 +30,25 @@ steps:
 
 #script based on https://www.timmerman.it/index.php/using-values-from-your-arm-template-across-your-azure-devops-pipeline-with-powershell/
 - powershell: |
-    $outputs = '$(ArmDeploymentOutputs)' | ConvertFrom-Json
-    $outputs.PSObject.Properties | ForEach-Object {
-      $type = ($_.value.type).ToLower()
-      $keyname = "{0}{1}" -f '${{ parameters.OutputVariableNamePrefix }}', $_.name 
-      $value = $_.value.value
+    $data = '$(ArmDeploymentOutputs)'
+    if ($data -ne '') {
+      $outputs = $data | ConvertFrom-Json
+      $outputs.PSObject.Properties | ForEach-Object {
+        $type = ($_.value.type).ToLower()
+        $keyname = "{0}{1}" -f '${{ parameters.OutputVariableNamePrefix }}', $_.name 
+        $value = $_.value.value
 
-      if ($type -eq "securestring") {
-        $var = '##vso[task.setvariable variable={0};issecret=true]{1}' -f $keyname, $value
-        Write-Output $var
-        Write-Output "Added variable '$keyname' ('$type')"
-      } elseif ($type -eq "string") {
-        $var = '##vso[task.setvariable variable={0}]{1}' -f $keyname, $value
-        Write-Output $var
-        Write-Output "Added variable '$keyname' ('$type') with value '$value'"
-      } else {
-        Write-Output "Skipped conversion: Type '$type' is not supported for '$keyname'"
+        if ($type -eq "securestring") {
+          $var = '##vso[task.setvariable variable={0};issecret=true]{1}' -f $keyname, $value
+          Write-Output $var
+          Write-Output "Added variable '$keyname' ('$type')"
+        } elseif ($type -eq "string") {
+          $var = '##vso[task.setvariable variable={0}]{1}' -f $keyname, $value
+          Write-Output $var
+          Write-Output "Added variable '$keyname' ('$type') with value '$value'"
+        } else {
+          Write-Output "Skipped conversion: Type '$type' is not supported for '$keyname'"
+        }
       }
     }
   #name: ArmOutputToVariables #todo: make name variable and test. 
