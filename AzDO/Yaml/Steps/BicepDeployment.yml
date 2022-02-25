@@ -6,6 +6,7 @@ parameters:
   default: ''
 - name: 'ResourceLocation'
   type: string
+  default: ''
 - name: 'TemplateFile'
   type: string
 - name: 'TemplateParameterFile'
@@ -40,6 +41,7 @@ steps:
       if [ "${{ parameters.ResourceGroupName }}" == "" ]; then
         az deployment sub create \
           --name deploy \
+          --location ${{ parameters.ResourceLocation }} \
           --template-file ${{ parameters.TemplateFile }} \
           $params
       else 
