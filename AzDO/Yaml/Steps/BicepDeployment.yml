@@ -32,10 +32,10 @@ steps:
     inlineScript: |
       params=""
       if [ "${{ parameters.ParameterOverrides }}" != "" ]; then 
-        params+="--parameters ${{ parameters.ParameterOverrides }}"
+        params+=" --parameters ${{ parameters.ParameterOverrides }}"
       fi
       if [ "${{ parameters.TemplateParameterFile }}" != "" ]; then 
-        params+="--parameters @${{ parameters.TemplateParameterFile }}"
+        params+=" --parameters @${{ parameters.TemplateParameterFile }}"
       fi
       
       if [ "${{ parameters.ResourceGroupName }}" == "" ]; then
