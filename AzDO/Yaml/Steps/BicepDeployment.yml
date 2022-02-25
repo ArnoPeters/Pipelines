@@ -3,6 +3,7 @@ parameters:
   type: string
 - name: 'ResourceGroupName'
   type: string
+  default: ""
 - name: 'ResourceLocation'
   type: string
 - name: 'TemplateFile'
