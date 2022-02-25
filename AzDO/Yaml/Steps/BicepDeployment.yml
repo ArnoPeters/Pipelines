@@ -38,7 +38,7 @@ steps:
       fi
       
       if [ "${{ parameters.ResourceGroupName }}" == "" ]; then
-        az deployment create \
+        az deployment sub create \
           --name deploy \
           --template-file ${{ parameters.TemplateFile }} \
           $params
