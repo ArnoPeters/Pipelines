@@ -44,24 +44,21 @@ steps:
           --location ${{ parameters.ResourceLocation }} \
           --template-file ${{ parameters.TemplateFile }} \
           $params
+
+          echo "az deployment sub show --name deploy"
+          deploymentoutputs=$(az deployment sub show --name deploy \
+            --query properties.outputs)
       else 
         az deployment group create \
           --name deploy \
           --resource-group ${{ parameters.ResourceGroupName }} \
           --template-file ${{ parameters.TemplateFile }} \
           $params
-      
+
+          echo "az deployment group show --resource-group '$(resourceGroupName)' --name deploy"
+          deploymentoutputs=$(az deployment group show --resource-group '$(resourceGroupName)' --name deploy \
+            --query properties.outputs)
       fi
-
-      az deployment group create \
-        --name deploy \
-        --resource-group ${{ parameters.ResourceGroupName }} \
-        --template-file ${{ parameters.TemplateFile }} \
-        $params
-
-      echo "az deployment group show --resource-group '$(resourceGroupName)' --name deploy"
-      deploymentoutputs=$(az deployment group show --resource-group '$(resourceGroupName)' --name deploy \
-        --query properties.outputs)
 
       echo 'convert outputs to variables'
       echo $deploymentoutputs | jq -c '. | to_entries[] | [.key, .value.value, .value.type]' |
