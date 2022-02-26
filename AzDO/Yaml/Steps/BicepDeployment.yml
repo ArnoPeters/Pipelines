@@ -48,7 +48,7 @@ steps:
           echo "az deployment sub show --name deploy"
           deploymentoutputs=$(az deployment sub show --name deploy \
             --query properties.outputs)
-      else 
+      elif [ "${{ parameters.ResourceLocation }}" == "" ]; then
         az deployment group create \
           --name deploy \
           --resource-group ${{ parameters.ResourceGroupName }} \
@@ -58,6 +58,8 @@ steps:
           echo "az deployment group show --resource-group '$(resourceGroupName)' --name deploy"
           deploymentoutputs=$(az deployment group show --resource-group '$(resourceGroupName)' --name deploy \
             --query properties.outputs)
+      else
+         echo "Specify either ResourceGroup or ResourceLocation."
       fi
 
       echo 'convert outputs to variables'
