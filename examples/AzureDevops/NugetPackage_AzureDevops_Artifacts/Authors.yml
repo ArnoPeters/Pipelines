@@ -1,0 +1,8 @@
+# Variables to be included in an Azure Devops YAML-based pipeline
+variables:
+  - name: company
+    value: ''  
+  - name: authors
+    value: 'Arno Peters'  
+  - name: copyright
+    value: ''      

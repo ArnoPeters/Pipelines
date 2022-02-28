@@ -1,0 +1,52 @@
+## This generates an ever-increasing number based on the date and build. Useful for CI\CD scenario's.
+name: $(date:yyyy.M.d)$(rev:.r) 
+
+## Pull request builds in yaml works in Github, but needs to be setup via "manage repositories" in Azure Devops instead
+#pr:
+#  branches:
+#    include:
+#    - main
+
+trigger:
+  branches:
+    include: 
+    - main
+  paths:
+    exclude:
+    - /.vscode/*
+    - /docs/*
+    - /*.md
+
+resources:
+  repositories:
+    - repository: templates
+      type: github
+      name: "ArnoPeters/Pipelines"
+      endpoint: github.com_ArnoPeters
+
+variables:
+    #Standard variables
+  - template: Authors.yml
+  - name: AzureDevops_ArtifactFeed
+    value: 'Your Azure Devops Artifact Feed Name Here'
+  
+  
+stages:
+- stage: Build
+  displayName: Build and Publish nuget package 
+  pool: #default 
+    vmImage: 'ubuntu-latest'
+  jobs:
+  - template: AzDO/Yaml/Jobs/NugetPackage_AzDOArtifacts.yml@templates
+    parameters:
+      azureArtifactsFeed: "$(AzureDevops_ArtifactFeed)"
+      buildSteps: 
+      - task: UseDotNet@2
+        displayName: 'Use dotnet 6'
+        inputs:
+          version: '6.0.x'
+      - template: AzDO/Yaml/Steps/BuildAndTest.yml@templates
+        parameters:
+          azureArtifactsFeed: "$(AzureDevops_ArtifactFeed)"
+          runSettingsFile: 'src/.runsettings'
+      
