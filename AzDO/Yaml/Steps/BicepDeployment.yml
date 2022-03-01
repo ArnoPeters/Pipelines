@@ -33,9 +33,9 @@ steps:
     scriptType: bash
     scriptLocation: inlineScript
     inlineScript: |
-      deploymentName = ${{ parameters.deploymentName }}
+      deploymentName=${{ parameters.deploymentName }}
       if [ "$deploymentName" == "" ]; then 
-        deploymentName = "$deploymentName_$(date +%F_%H-%M-%S)"
+        deploymentName="deploy_$(date +%F_%H-%M-%S)"
       fi
 
       params=""
