@@ -57,6 +57,7 @@ steps:
           deploymentoutputs=$(az deployment sub show --name $deploymentName \
             --query properties.outputs)
       elif [ "${{ parameters.ResourceLocation }}" == "" ]; then
+
         az deployment group create \
           --name $deploymentName \
           --resource-group ${{ parameters.ResourceGroupName }} \
