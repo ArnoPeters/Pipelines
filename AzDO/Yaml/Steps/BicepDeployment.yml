@@ -17,7 +17,10 @@ parameters:
 - name: 'OutputVariableNamePrefix'
   type: string
   default: ''
-  
+- name: 'deploymentName'
+  type: string
+  default: ''
+
 steps:
 
 # Based on the script found on https://blog.johnnyreilly.com/2021/03/20/bicep-meet-azure-pipelines/
@@ -30,6 +33,11 @@ steps:
     scriptType: bash
     scriptLocation: inlineScript
     inlineScript: |
+      deploymentName = ${{ parameters.deploymentName }}
+      if [ "$deploymentName" == "" ]; then 
+        deploymentName = "$deploymentName_$(date +%F_%H-%M-%S)"
+      fi
+
       params=""
       if [ "${{ parameters.ParameterOverrides }}" != "" ]; then 
         params+=" --parameters ${{ parameters.ParameterOverrides }}"
@@ -59,7 +67,7 @@ steps:
           deploymentoutputs=$(az deployment group show --resource-group '$(resourceGroupName)' --name deploy \
             --query properties.outputs)
       else
-         echo "Specify either ResourceGroup or ResourceLocation."
+        echo "Specify either ResourceGroup or ResourceLocation."
       fi
 
       echo 'convert outputs to variables'
