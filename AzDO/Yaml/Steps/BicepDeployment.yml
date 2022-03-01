@@ -17,7 +17,10 @@ parameters:
 - name: 'OutputVariableNamePrefix'
   type: string
   default: ''
-  
+- name: 'deploymentName'
+  type: string
+  default: ''
+
 steps:
 
 # Based on the script found on https://blog.johnnyreilly.com/2021/03/20/bicep-meet-azure-pipelines/
@@ -30,6 +33,11 @@ steps:
     scriptType: bash
     scriptLocation: inlineScript
     inlineScript: |
+      deploymentName = ${{ parameters.deploymentName }}
+      if [ "$deploymentName" == "" ]; then 
+        deploymentName = "$deploymentName_$(date +%F_%H-%M-%S)"
+      fi
+
       params=""
       if [ "${{ parameters.ParameterOverrides }}" != "" ]; then 
         params+=" --parameters ${{ parameters.ParameterOverrides }}"
@@ -40,24 +48,27 @@ steps:
       
       if [ "${{ parameters.ResourceGroupName }}" == "" ]; then
         az deployment sub create \
-          --name deploy \
+          --name $deploymentName \
           --location ${{ parameters.ResourceLocation }} \
           --template-file ${{ parameters.TemplateFile }} \
           $params
 
-          echo "az deployment sub show --name deploy"
-          deploymentoutputs=$(az deployment sub show --name deploy \
+          echo "az deployment sub show --name $deploymentName"
+          deploymentoutputs=$(az deployment sub show --name $deploymentName \
             --query properties.outputs)
-      else 
+      elif [ "${{ parameters.ResourceLocation }}" == "" ]; then
+
         az deployment group create \
-          --name deploy \
+          --name $deploymentName \
           --resource-group ${{ parameters.ResourceGroupName }} \
           --template-file ${{ parameters.TemplateFile }} \
           $params
 
-          echo "az deployment group show --resource-group '$(resourceGroupName)' --name deploy"
-          deploymentoutputs=$(az deployment group show --resource-group '$(resourceGroupName)' --name deploy \
+          echo "az deployment group show --resource-group '$(resourceGroupName)' --name $deploymentName"
+          deploymentoutputs=$(az deployment group show --resource-group '$(resourceGroupName)' --name $deploymentName \
             --query properties.outputs)
+      else
+        echo "Specify either ResourceGroup or ResourceLocation."
       fi
 
       echo 'convert outputs to variables'
