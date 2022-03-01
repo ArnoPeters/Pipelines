@@ -35,7 +35,7 @@ steps:
     inlineScript: |
       deploymentName=${{ parameters.deploymentName }}
       if [ "$deploymentName" == "" ]; then 
-        deploymentName="deploy_$(date +%F_%H-%M-%S)"
+        deploymentName="deploy-$(date +%Y%m%d-%H%M%S)"
       fi
 
       params=""
