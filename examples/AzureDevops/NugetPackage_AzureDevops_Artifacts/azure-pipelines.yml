@@ -16,7 +16,7 @@ trigger:
     - /.vscode/*
     - /docs/*
     - /*.md
-    - /src/**/*.Tests    # If only tests are updated, and the branch protection has succesfully validated a PR, the main branch does NOT need to produce a package on merge. It would be identical to the last version. 
+    - /src/**/*.Tests/*    # If only tests are updated, and the branch protection has succesfully validated a PR, the main branch does NOT need to produce a package on merge. It would be identical to the last version. 
 
 resources:
   repositories:
