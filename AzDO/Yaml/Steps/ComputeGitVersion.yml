@@ -4,7 +4,7 @@
 parameters:
 - name: 'gitVersionConfigFilePath'
   type: string
-  default: 'GitVersion.yml'
+  default: 'gitversion.yml'
 - name: 'rootBranchName'
   displayName: 'Name of the root branch of the repository triggering the build.'
   type: string
