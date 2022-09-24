@@ -4,10 +4,12 @@
 parameters:
 - name: 'gitVersionConfigFilePath'
   type: string
+  default: 'GitVersion.yml'
 - name: 'rootBranchName'
   displayName: 'Name of the root branch of the repository triggering the build.'
   type: string
-
+  default: 'refs/heads/main'
+  
 steps:     
   - powershell: |
       if(('$(system.pullrequest.targetbranch)' -split '/')[-1] -eq ('${{ parameters.rootBranchName }}' -split '/')[-1])  
