@@ -34,21 +34,20 @@
         "Agent",
         "DeploymentGroup"
     ],
-    "revision": 3,
+    "revision": 1,
     "createdBy": {
         "displayName": "Arno Peters",
         "id": "6b7b6d39-61fa-4959-bf89-b8d308844343",
         "uniqueName": "arnop@4dotnet.nl"
     },
-    "createdOn": "2022-01-14T15:02:46.187Z",
+    "createdOn": "2023-01-04T21:55:25.687Z",
     "modifiedBy": {
         "displayName": "Arno Peters",
         "id": "6b7b6d39-61fa-4959-bf89-b8d308844343",
         "uniqueName": "arnop@4dotnet.nl"
     },
-    "modifiedOn": "2022-11-11T12:47:50.517Z",
-    "comment": "",
-    "id": "65ea90a9-84f9-412d-954d-8b03f5f01ffc",
+    "modifiedOn": "2023-01-04T21:55:25.687Z",
+    "id": "4daed3c2-6d3c-4ec8-952c-d136c0b37387",
     "name": "Azure CLI Deployment",
     "version": {
         "major": 1,
@@ -83,6 +82,17 @@
         },
         {
             "aliases": [],
+            "options": {},
+            "properties": {},
+            "name": "deploymentName",
+            "label": "Deployment Name",
+            "defaultValue": "",
+            "type": "string",
+            "helpMarkDown": "Name of the deployment as it is to be shown in Azure. Leave blank to generate a timestamped name.",
+            "groupName": ""
+        },
+        {
+            "aliases": [],
             "options": {
                 "incremental": "Incremental",
                 "complete": "Complete"
@@ -96,6 +106,17 @@
             "required": true,
             "type": "pickList",
             "helpMarkDown": "Deployment mode of the template in Azure"
+        },
+        {
+            "aliases": [],
+            "options": {},
+            "properties": {},
+            "name": "outputVariableNamePrefix",
+            "label": "Output Variable Name Prefix",
+            "defaultValue": "",
+            "type": "string",
+            "helpMarkDown": "Use to distinguish output variable groups if multiple Azure Deployments are used in the same release.",
+            "groupName": ""
         },
         {
             "aliases": [],
@@ -119,8 +140,8 @@
             "required": true,
             "type": "string",
             "helpMarkDown": "Name of the resource group to be used in Azure",
-            "groupName": "",
-            "visibleRule": "DeploymentLevel = ResourceGroup"
+            "visibleRule": "DeploymentLevel = ResourceGroup",
+            "groupName": ""
         },
         {
             "aliases": [],
@@ -132,8 +153,8 @@
             "required": true,
             "type": "string",
             "helpMarkDown": "Azure location of the resources",
-            "groupName": "",
-            "visibleRule": "DeploymentLevel = Subscription"
+            "visibleRule": "DeploymentLevel = Subscription",
+            "groupName": ""
         },
         {
             "aliases": [],
@@ -168,33 +189,8 @@
             "name": "templateParameterFile",
             "label": "Template parameter file",
             "defaultValue": "",
-            "required": false,
             "type": "string",
             "helpMarkDown": "Full path to the template parameter file",
-            "groupName": ""
-        },
-        {
-            "aliases": [],
-            "options": {},
-            "properties": {},
-            "name": "deploymentName",
-            "label": "Deployment Name",
-            "defaultValue": "",
-            "required": false,
-            "type": "string",
-            "helpMarkDown": "Name of the deployment as it is to be shown in Azure. Leave blank to generate a timestamped name.",
-            "groupName": ""
-        },
-        {
-            "aliases": [],
-            "options": {},
-            "properties": {},
-            "name": "outputVariableNamePrefix",
-            "label": "Output Variable Name Prefix",
-            "defaultValue": "",
-            "required": false,
-            "type": "string",
-            "helpMarkDown": "Use to distinguish output variable groups if multiple Azure Deployments are used in the same release.",
             "groupName": ""
         }
     ],
