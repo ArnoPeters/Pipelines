@@ -1,10 +1,16 @@
 deploymentName='$(deploymentName)'
-templateParameterFile='$(templateParameterFile)'
-parameterOverrides="$(parameterOverrides)"
-resourceGroupName='$(resourcegroupName)'
-resourceLocation='$(resourceLocation)'
-templateFile='$(templateFile)'
+deploymentMode='$(deploymentMode)'
+deploymentLevel='$(deploymentLevel)'
 outputVariableNamePrefix='$(outputVariableNamePrefix)'
+parameterOverrides='$(parameterOverrides)'
+resourceLocation='$(resourceLocation)'
+resourceGroupName='$(resourcegroupName)'
+templateFile='$(templateFile)'
+templateParameterFile='$(templateParameterFile)'
+
+# Path sanitizing
+templateFile="${templateFile//\\//}"
+templateParameterFile="${templateParameterFile//\\//}"
 
 if [ "$deploymentName" == "" ]; then 
   deploymentName="$(date +%Y%m%d-%H%M%S)-deployment"
@@ -18,30 +24,22 @@ if [ "$templateParameterFile" != "" ]; then
   params+=" --parameters @$templateParameterFile"
 fi
 
-if [ "$resourceGroupName" == "" ]; then
-  az deployment sub create \
-    --name $deploymentName \
-    --location $resourceLocation \
-    --template-file $templateFile \
-    $params
+if [ $deploymentLevel == 'Subscription' ]; then
+  cmd="az deployment sub create --name $deploymentName --location $resourceLocation --template-file $templateFile $params"
+  echo $cmd
+  eval $cmd
 
-    echo "az deployment sub show --name $deploymentName"
-    deploymentoutputs=$(az deployment sub show --name $deploymentName \
-      --query properties.outputs)
-elif [ "$resourceLocation" == "" ]; then
-
-  az deployment group create \
-    --name $deploymentName \
-    --resource-group $resourceGroupName \
-    --template-file $templateFile \
-    $params
-
-    echo "az deployment group show --resource-group $resourceGroupName --name $deploymentName"
-    deploymentoutputs=$(az deployment group show --resource-group $resourceGroupName --name $deploymentName \
-      --query properties.outputs)
+  cmd="az deployment sub show --name $deploymentName --query properties.outputs"
+  echo $cmd
+  deploymentoutputs=$(eval $cmd)
 else
-  echo "Specify either ResourceGroup or ResourceLocation."
-  exit 1
+  cmd="az deployment group create --name $deploymentName --mode $deploymentMode --resource-group $resourceGroupName --template-file $templateFile $params"
+  echo $cmd
+  eval $cmd
+
+  cmd="az deployment group show --resource-group $resourceGroupName --name $deploymentName --query properties.outputs"
+  echo $cmd
+  deploymentoutputs=$(eval $cmd)
 fi
 
 echo 'convert outputs to variables'
