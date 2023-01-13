@@ -4,6 +4,7 @@ root = true
 # General style: use spaces. Don't specify an indent_size for everything here, this will mess up too many files unintentionally. 
 [*]
 indent_style = space
+indent_size = 2
 
 [*.{yml,yaml}]
 indent_size = 2
