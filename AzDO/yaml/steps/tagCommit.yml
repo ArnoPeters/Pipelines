@@ -1,0 +1,25 @@
+# Prerequisites: 
+# All Repositories -> Security ->
+# The Project Collection Build Server ACCOUNT - (not the GROUP!) - needs the following permissions: 
+# - Tag
+# - Contribute
+#
+# The pipeline needs to keep GIT credentials available for this task by setting 'persistCredentials' to 'true'
+#  YAML: 
+# ```
+# Steps:
+# - checkout: self
+#   persistCredentials: true
+
+parameters:
+- name: rootBranchName
+  type: string
+  default: 'refs/heads/main'
+- name: value
+  type: string
+steps:
+- script: |
+    git tag ${{ parameters.value }}
+    git push origin "${{ parameters.value }}"
+  workingDirectory: $(Build.SourcesDirectory)
+  displayName: Tag commit

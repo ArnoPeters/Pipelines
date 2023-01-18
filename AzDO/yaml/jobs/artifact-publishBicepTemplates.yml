@@ -1,0 +1,35 @@
+parameters:
+  publishFolder: '$(build.artifactstagingdirectory)'
+  artifactName: 'BicepTemplates'
+  flattenApplicationFolders: false
+  applicationTemplatesFolder: 
+  jsonFilter: '**/*.json'
+
+jobs:
+- job: PublishApplicationBicepTemplates
+  displayName: Publish APPLICATION BICEP templates to artifacts
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - checkout: self
+    clean: true
+
+  - task: CopyFiles@2
+    displayName: Copy Application BICEP templates
+    inputs:
+      sourceFolder: '${{ parameters.applicationTemplatesFolder }}'
+      contents: |
+        **/*.ps1
+        **/*.psm1
+        **/*.bicep
+        ${{ parameters.jsonFilter }}
+        !**/.vscode/**/*.json
+      targetFolder: '${{ parameters.publishFolder }}/ApplicationTemplates'
+      flattenFolders: ${{ parameters.flattenApplicationFolders }}
+
+  - task: PublishBuildArtifacts@1
+    displayName: Publish '${{ parameters.publishFolder }}/ApplicationTemplates' to pipeline artifacts
+    inputs:
+      pathToPublish: '${{ parameters.publishFolder }}/ApplicationTemplates'
+      artifactName: 'Application_${{ parameters.artifactName }}'
+      artifactType: container

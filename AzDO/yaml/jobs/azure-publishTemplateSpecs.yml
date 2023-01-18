@@ -1,0 +1,43 @@
+# Job combining steps to simplify versioning and publishing template specs from a repo. 
+# Uses Gitversion and repo tagging: it is recommended to keep the repo as small as possible so that only relevant changes will result in a new version and deployment. 
+
+parameters:
+- name: azureSubscriptionName
+  displayName: "Name of the Azure Subscription as defined in service connections"
+- name: resourceGroupName
+- name: resoureGrouplocation
+- name: templateFolder
+- name: publishWildcardVersions
+  type: boolean
+  default: false
+- name: publishLatest
+  type: boolean
+  default: true
+
+jobs:
+- job: PublishTemplateSpecs
+  displayName: Publish folder as TemplateSpecs to Azure
+  variables:
+    #preventing git shallow clone to fix gitversion error  https://github.com/GitTools/GitVersion/issues/3091
+    Agent.Source.Git.ShallowFetchDepth: 0
+  steps: 
+  - checkout: self
+    displayName: "Checkout repository including submodules"
+    submodules: true
+    persistCredentials: true
+  - template: ../steps/compute-gitVersion.yml
+  - template: ../steps/upload-templateSpecs.yml
+    parameters:
+      templateFolder: '${{ parameters.templateFolder }}'
+      resourceGroupName: '${{ parameters.resourceGroupName }}'
+      resoureGrouplocation: '${{ parameters.resoureGrouplocation }}'
+      azureSubscriptionName: '${{ parameters.azureSubscriptionName }}'
+      semverMajor: '$(Gitversion.Major)'
+      semverMinor: '$(Gitversion.Minor)'
+      semverPatch: '$(Gitversion.Patch)'
+      preReleaseLabel: '$(BUILD_PR_SOURCEBRANCH)'
+      publishWildcardVersions: ${{ parameters.publishWildcardVersions  }}
+      publishLatest: ${{ parameters.publishLatest  }}
+  - template: ../steps/tagCommit.yml
+    parameters:
+      value: 'v$(Gitversion.MajorMinorPatch)'

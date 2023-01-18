@@ -1,14 +1,20 @@
-deploymentName='$(deploymentName)'
-deploymentMode='$(deploymentMode)'
-deploymentLevel='$(deploymentLevel)'
-outputVariableNamePrefix='$(outputVariableNamePrefix)'
-parameterOverrides='$(parameterOverrides)'
-resourceLocation='$(resourceLocation)'
-resourceGroupName='$(resourcegroupName)'
-templateFile='$(templateFile)'
-templateParameterFile='$(templateParameterFile)'
+#!/bin/bash
 
-# Path sanitizing
+# Uncomment to get the script for local testing or for inline use in a Task Group 
+
+# deploymentName='$(deploymentName)'
+# deploymentMode='$(deploymentMode)'
+# deploymentLevel='$(deploymentLevel)'
+# outputVariableNamePrefix='$(outputVariableNamePrefix)'
+# parameterOverrides='$(parameterOverrides)'
+# resourceLocation='$(resourceLocation)'
+# resourceGroupName='$(resourcegroupName)'
+# templateFile='$(templateFile)'
+# templateParameterFile='$(templateParameterFile)'
+
+# --- Script start --- 
+
+# Path sanitizing for Linux
 templateFile="${templateFile//\\//}"
 templateParameterFile="${templateParameterFile//\\//}"
 
