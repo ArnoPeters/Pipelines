@@ -1,0 +1,65 @@
+parameters:
+  sharedRepoName: 'shared'
+  sharedRepoBranchRef:  'master'
+  publishFolder: '$(build.artifactstagingdirectory)'
+  artifactName: 'ArmTemplates'
+  flattenApplicationFolders: false
+  applicationArmTemplatesFolder: 
+  jsonFilter: '**/*.json'
+
+jobs:
+- job: PublishApplicationArmTemplates
+  displayName: Publish APPLICATION ARM templates to artifacts
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - checkout: self
+    clean: true
+
+  - task: CopyFiles@2
+    displayName: Copy Application ARM templates
+    inputs:
+      sourceFolder: '${{ parameters.applicationArmTemplatesFolder }}'
+      contents: |
+        **/*.ps1
+        **/*.psm1
+        ${{ parameters.jsonFilter }}
+        !**/.vscode/**/*.json
+      targetFolder: '${{ parameters.publishFolder }}/Application'
+      flattenFolders: ${{ parameters.flattenApplicationFolders }}
+
+  - task: PublishBuildArtifacts@1
+    displayName: Publish '${{ parameters.publishFolder }}/Application' to pipeline artifacts
+    inputs:
+      pathToPublish: '${{ parameters.publishFolder }}/Application'
+      artifactName: 'Application_${{ parameters.artifactName }}'
+      artifactType: container
+
+- job: PublishSharedArmTemplates
+  displayName: Publish SHARED ARM templates
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - checkout: git://$(System.TeamProject)/${{ parameters.sharedRepoName }}@${{ parameters.sharedRepoBranchRef }}
+
+  - task: CopyFiles@2
+    displayName: Copy Shared ARM templates
+    inputs:
+      contents: |
+        $(Build.SourcesDirectory)/ARM-templates/**/*.ps1
+        $(Build.SourcesDirectory)/ARM-templates/**/*.psm1
+        $(Build.SourcesDirectory)/ARM-templates/**/*.json
+        !$(Build.SourcesDirectory)/ARM-templates/**/*.parameters.json
+        !$(Build.SourcesDirectory)/ARM-templates/**/*.parameters.*.json
+        !**/.vscode/**/*.json
+      targetFolder: '${{ parameters.publishFolder }}/Shared'
+      flattenFolders: true
+      overWrite: true
+
+  - task: PublishBuildArtifacts@1
+    displayName: Publish '${{ parameters.publishFolder }}/Shared' to pipeline artifacts
+    inputs:
+      pathToPublish: '${{ parameters.publishFolder }}/Shared'
+      artifactName: 'Shared_${{ parameters.artifactName }}'
+      artifactType: container
+

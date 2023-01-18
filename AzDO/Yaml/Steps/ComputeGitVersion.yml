@@ -27,7 +27,7 @@ steps:
       versionSpec: 5.x
 
   # Gitversion will makes these variables available:  
-  # https://gitversion.readthedocs.io/en/latest/input/docs/more-info/variables/
+  # https://gitversion.net/docs/reference/variables
   - task: gittools.gittools.execute-gitversion-task.gitversion/execute@0
     displayName: Versioning - Compute Gitversion
     inputs:
