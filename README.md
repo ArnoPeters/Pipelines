@@ -19,4 +19,4 @@ Note: not every pipeline needs all tasks. The links to the tasks will also be ad
 - [(Free) - Github Tag - Github Repo Tagging](https://marketplace.visualstudio.com/items?itemName=KriefMikael.githubtools)
 
 ### (Optional) Authors
-Check and update the values of the variables in "AzDo/Yaml/Variables/Authors.yml". This file can used in several workflows (like the (TODO: LINK TO) nuget package templates when made public), and ensures that your authoring information is uniformly embedded in your packages.
+Check and update the values of the variables in "AzDo/yaml/variables/authors.yml". This file can used in several workflows (like the (TODO: LINK TO) nuget package templates when made public), and ensures that your authoring information is uniformly embedded in your packages.
