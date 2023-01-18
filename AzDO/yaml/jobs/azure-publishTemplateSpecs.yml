@@ -25,8 +25,8 @@ jobs:
     displayName: "Checkout repository including submodules"
     submodules: true
     persistCredentials: true
-  - template: ../steps/compute-gitVersion.yml
-  - template: ../steps/upload-templateSpecs.yml
+  - template: ../steps/computeGitVersion.yml
+  - template: ../steps/azure-uploadTemplateSpecs.yml
     parameters:
       templateFolder: '${{ parameters.templateFolder }}'
       resourceGroupName: '${{ parameters.resourceGroupName }}'
