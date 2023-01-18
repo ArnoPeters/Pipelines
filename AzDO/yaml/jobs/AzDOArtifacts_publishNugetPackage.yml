@@ -103,6 +103,7 @@ jobs:
     displayName: 'NuGet - Push package(s) to [${{ parameters.azureArtifactsFeed }}]'
     inputs:
       command: push
+      nuGetFeedType: 'internal'
       packagesToPush: '$(System.DefaultWorkingDirectory)/src/**/*.nupkg'
       publishVstsFeed: '${{ parameters.azureArtifactsFeed }}'
 
