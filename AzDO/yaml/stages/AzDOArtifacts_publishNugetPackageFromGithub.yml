@@ -11,6 +11,8 @@
 # - https://marketplace.visualstudio.com/items?itemName=gittools.gittools)
 # - https://marketplace.visualstudio.com/items?itemName=KriefMikael.githubtools
 
+# TODO: retest, probably the job is sufficient and this stage can be deleted
+
 parameters:
 - name: azureArtifactsFeed
 - name: 'pool'

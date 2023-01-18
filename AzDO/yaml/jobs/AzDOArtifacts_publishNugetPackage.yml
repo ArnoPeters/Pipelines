@@ -52,6 +52,8 @@ parameters:
     vmImage: 'windows-latest'
   }
 
+# TODO: retest all this. Should work for repo's in Azure Devops and Github
+
 jobs:
 - job: ${{ parameters.buildJobName }}
   displayName: Autoversion and build Nuget package
@@ -103,28 +105,36 @@ jobs:
 
 #Separate job to ensure that it is running on windows
 - ${{ if parameters.publishSymbols }}:
-  - job: PublishAzDO
-    dependsOn: ${{ parameters.buildJobName }}
-    condition: succeeded()
-    displayName: Publish Symbols to Azure Devops Artifacts
-    pool: ${{ parameters.windowsPool }}
-    steps:
-    - checkout: none
-      displayName: "SKIP - checkout code is not required"
+  - template: AzDOArtifacts_publishPdbSymbols.yml
+    parameters:
+      pdbArtifactName: ${{ parameters.pdbArtifactName }}
+      dependsOn: ${{ parameters.buildJobName }}
+      pool: ${{ parameters.windowsPool }}
 
-    # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/utility/download-pipeline-artifact?view=azure-devops
-    - task: DownloadPipelineArtifact@2
-      displayName: "Download Artifact - '${{ parameters.pdbArtifactName }}'"
-      inputs:
-        downloadPath: '$(Pipeline.Workspace)'
-        buildType: current
-        artifact: ${{ parameters.pdbArtifactName }}      
+      
 
-    # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/build/index-sources-publish-symbols?view=azure-devops
-    - task: PublishSymbols@2
-      displayName: 'Symbols - Upload *.pdb to Azure Devops Artifacts'
-      inputs:
-        symbolsFolder: '$(Pipeline.Workspace)'
-        searchPattern: '**\*.pdb'
-        indexSources: false
-        SymbolServerType: 'TeamServices'
+  # - job: PublishAzDO
+  #   dependsOn: ${{ parameters.buildJobName }}
+  #   condition: succeeded()
+  #   displayName: Publish Symbols to Azure Devops Artifacts
+  #   pool: ${{ parameters.windowsPool }}
+  #   steps:
+  #   - checkout: none
+  #     displayName: "SKIP - checkout code is not required"
+
+  #   # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/utility/download-pipeline-artifact?view=azure-devops
+  #   - task: DownloadPipelineArtifact@2
+  #     displayName: "Download Artifact - '${{ parameters.pdbArtifactName }}'"
+  #     inputs:
+  #       downloadPath: '$(Pipeline.Workspace)'
+  #       buildType: current
+  #       artifact: ${{ parameters.pdbArtifactName }}      
+
+  #   # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/build/index-sources-publish-symbols?view=azure-devops
+  #   - task: PublishSymbols@2
+  #     displayName: 'Symbols - Upload *.pdb to Azure Devops Artifacts'
+  #     inputs:
+  #       symbolsFolder: '$(Pipeline.Workspace)'
+  #       searchPattern: '**\*.pdb'
+  #       indexSources: false
+  #       SymbolServerType: 'TeamServices'
