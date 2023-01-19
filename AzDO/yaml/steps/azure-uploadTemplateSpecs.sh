@@ -47,6 +47,10 @@ filter="@($filter)"
 sourceFolder="${sourceFolder//\\//}" 
 sourceFolder="${sourceFolder#"$PWD"}" 
 
+if [[ $sourceFolder == /* ]]; then 
+  sourceFolder=".$sourceFolder" 
+fi
+
 #https://unix.stackexchange.com/a/494146
 function walk_dir () {    
   shopt -s nullglob dotglob extglob
