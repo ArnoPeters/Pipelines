@@ -104,7 +104,7 @@ steps:
                 hasUploadedAnything=true # Not the perfect solution to use global var for this
                 cmd="az ts create --yes --name \"$namespacedFileName\" --version \"$version\" --resource-group \"$resourceGroupName\" --location \"$location\" --template-file \"$pathname\""
                 echo "$cmd"
-                #eval "$cmd"
+                eval "$cmd"
               done
             esac
           fi
@@ -112,11 +112,9 @@ steps:
       }
 
       walk_dir "$sourceFolder" "${versions[@]}"
-      echo $hasUploadedAnything
-      if  $hasUploadedAnything ; then 
-        echo "exit 0"
-      exit 0
+
+      if $hasUploadedAnything ; then 
+        exit 0
       else 
         exit 1
-        echo "exit 1"
       fi
