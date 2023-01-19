@@ -51,6 +51,8 @@ if [[ $sourceFolder == /* ]]; then
   sourceFolder=".$sourceFolder" 
 fi
 
+hasUploadedAnyhting=false
+
 #https://unix.stackexchange.com/a/494146
 function walk_dir () {    
   shopt -s nullglob dotglob extglob
@@ -59,7 +61,7 @@ function walk_dir () {
   local -a versions=("$@")
   for pathname in "$path"/*; do
     if [ -d "$pathname" ]; then
-        walk_dir "$pathname" "${versions[@]}"
+      walk_dir "$pathname" "${versions[@]}"
     else
       case "$pathname" in
         $filter)
@@ -75,6 +77,7 @@ function walk_dir () {
 
         for version in "${versions[@]}"
         do
+          hasUploadedAnyhting=true # Not the perfect solution to use global var for this
           cmd="az ts create --yes --name \"$namespacedFileName\" --version \"$version\" --resource-group \"$resourceGroupName\" --location \"$location\" --template-file \"$pathname\""
           echo "$cmd"
           eval "$cmd"
@@ -85,3 +88,9 @@ function walk_dir () {
 }
 
 walk_dir "$sourceFolder" "${versions[@]}"
+
+if [ hasUploadedAnyhting ]; then 
+  exit 0
+else 
+  exit 1
+fi
