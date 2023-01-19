@@ -75,8 +75,8 @@ steps:
         sourceFolder=".$sourceFolder" 
       fi
 
-      hasUploadedAnyhting=false
-      
+      hasUploadedAnything=false
+
       #https://unix.stackexchange.com/a/494146
       function walk_dir () {    
         shopt -s nullglob dotglob extglob
@@ -101,7 +101,7 @@ steps:
 
               for version in "${versions[@]}"
               do
-                hasUploadedAnyhting=true # Not the perfect solution to use global var for this
+                hasUploadedAnything=true # Not the perfect solution to use global var for this
                 cmd="az ts create --yes --name \"$namespacedFileName\" --version \"$version\" --resource-group \"$resourceGroupName\" --location \"$location\" --template-file \"$pathname\""
                 echo "$cmd"
                 #eval "$cmd"
@@ -113,7 +113,7 @@ steps:
 
       walk_dir "$sourceFolder" "${versions[@]}"
       
-      if [ hasUploadedAnyhting ]; then 
+      if [ $hasUploadedAnything ]; then 
         exit 0
       else 
         exit 1
