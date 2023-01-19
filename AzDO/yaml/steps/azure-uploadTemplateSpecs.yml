@@ -112,9 +112,10 @@ steps:
       }
 
       walk_dir "$sourceFolder" "${versions[@]}"
-      
+      echo $hasUploadedAnything
       if [ $hasUploadedAnything ]; then 
-        exit 0
+        
+      exit 0
       else 
         exit 1
       fi
