@@ -1,5 +1,5 @@
 parameters:
-- name: 'azureArtifactsFeed'
+- name: 'azureArtifactsSourceFeed'
   type: string
 - name: 'buildConfiguration'
   default: 'Release'
@@ -20,7 +20,7 @@ steps:
     projects: '${{ parameters.projects }}'
     command: 'restore'
     feedsToUse: 'select'
-    vstsFeed: '${{ parameters.azureArtifactsFeed }}'
+    vstsFeed: '${{ parameters.azureArtifactsSourceFeed }}'
 
 - task: DotNetCoreCLI@2
   displayName: Build

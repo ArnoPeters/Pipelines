@@ -17,7 +17,7 @@
 # - https://marketplace.visualstudio.com/items?itemName=gittools.gittools)
 
 parameters:
-- name: azureArtifactsFeed
+- name: azureArtifactsTargetFeed
 - name: buildSteps
   type: stepList
 - name: dependsOn
@@ -52,13 +52,11 @@ parameters:
     vmImage: 'windows-latest'
   }
 
-# TODO: retest all this. Should work for repo's in Azure Devops and Github
-
 jobs:
 - job: ${{ parameters.buildJobName }}
   displayName: Autoversion and build Nuget package
   variables:
-    #preventing git shallow clone to fix gitversion error  https://github.com/GitTools/GitVersion/issues/3091
+    # preventing git shallow clone to fix gitversion error  https://github.com/GitTools/GitVersion/issues/3091
     Agent.Source.Git.ShallowFetchDepth: 0
   dependsOn: ${{ parameters.dependsOn }}
   condition: succeeded()
@@ -100,45 +98,17 @@ jobs:
         artifactName: '${{ parameters.pdbArtifactName }}'
 
   - task: DotNetCoreCLI@2
-    displayName: 'NuGet - Push package(s) to [${{ parameters.azureArtifactsFeed }}]'
+    displayName: 'NuGet - Push package(s) to [${{ parameters.azureArtifactsTargetFeed }}]'
     inputs:
       command: push
       nuGetFeedType: 'internal'
       packagesToPush: '$(System.DefaultWorkingDirectory)/src/**/*.nupkg'
-      publishVstsFeed: '${{ parameters.azureArtifactsFeed }}'
+      publishVstsFeed: '${{ parameters.azureArtifactsTargetFeed }}'
 
-#Separate job to ensure that it is running on windows
+# Separate job to ensure that it is running on windows (as it won't work on linux)
 - ${{ if parameters.publishSymbols }}:
   - template: AzDOArtifacts_publishPdbSymbols.yml
     parameters:
       pdbArtifactName: ${{ parameters.pdbArtifactName }}
       dependsOn: ${{ parameters.buildJobName }}
       pool: ${{ parameters.windowsPool }}
-
-      
-
-  # - job: PublishAzDO
-  #   dependsOn: ${{ parameters.buildJobName }}
-  #   condition: succeeded()
-  #   displayName: Publish Symbols to Azure Devops Artifacts
-  #   pool: ${{ parameters.windowsPool }}
-  #   steps:
-  #   - checkout: none
-  #     displayName: "SKIP - checkout code is not required"
-
-  #   # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/utility/download-pipeline-artifact?view=azure-devops
-  #   - task: DownloadPipelineArtifact@2
-  #     displayName: "Download Artifact - '${{ parameters.pdbArtifactName }}'"
-  #     inputs:
-  #       downloadPath: '$(Pipeline.Workspace)'
-  #       buildType: current
-  #       artifact: ${{ parameters.pdbArtifactName }}      
-
-  #   # https://docs.microsoft.com/en-us/azure/devops/pipelines/tasks/build/index-sources-publish-symbols?view=azure-devops
-  #   - task: PublishSymbols@2
-  #     displayName: 'Symbols - Upload *.pdb to Azure Devops Artifacts'
-  #     inputs:
-  #       symbolsFolder: '$(Pipeline.Workspace)'
-  #       searchPattern: '**\*.pdb'
-  #       indexSources: false
-  #       SymbolServerType: 'TeamServices'
