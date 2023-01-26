@@ -13,7 +13,13 @@ parameters:
 - name: publishLatest
   type: boolean
   default: true
-
+- name: 'gitVersionConfigFilePath'
+  type: string
+  default: 'GitVersion.yml'
+- name: rootBranchName
+  type: string
+  default: 'refs/heads/main'
+  
 jobs:
 - job: PublishTemplateSpecs
   displayName: Publish folder as TemplateSpecs to Azure
@@ -26,6 +32,8 @@ jobs:
     submodules: true
     persistCredentials: true
   - template: ../steps/computeGitVersion.yml
+      gitVersionConfigFilePath: ${{ parameters.gitVersionConfigFilePath }}
+      rootBranchName: ${{ parameters.rootBranchName }}
   - template: ../steps/azure-uploadTemplateSpecs.yml
     parameters:
       templateFolder: '${{ parameters.templateFolder }}'
