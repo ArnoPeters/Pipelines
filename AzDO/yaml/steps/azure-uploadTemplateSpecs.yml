@@ -38,6 +38,7 @@ steps:
     scriptType: bash
     scriptLocation: inlineScript
     inlineScript: |
+      echo "##[section]Determining version labels"
       if [[ ( "$preReleaseLabel" != "" ) && ( $preReleaseLabel != -* ) ]]; then 
         preReleaseLabelWithDash="-$preReleaseLabel"
       fi
@@ -61,7 +62,7 @@ steps:
           echo "Publishing 'latest' as version."
           versions+=("latest")
         else 
-          echo "Pre-release label present: skipping publish of 'latest' as version."
+          echo "##[warning]Pre-release label present: skipping publish of 'latest' as version."
         fi
       fi
 
@@ -99,7 +100,7 @@ steps:
               # Template specs are all stored as ARM anyway, so the file name can be added without keeping the extension
               namespacedFileName="${filePathInSourceFolder////.}.$fileRoot"
 
-              echo "##[group]Uploading $namespacedFileName to $resourceGroupName"
+              echo "##[group]Publishing [$pathname] as [$namespacedFileName]"
               for version in "${versions[@]}"
               do
                 hasUploadedAnything=true # Not the perfect solution to use global var for this
@@ -112,6 +113,7 @@ steps:
           fi
         done
       }
+      echo "##[section]Publish Template Specs to resource group [$resourceGroupName]"
 
       walk_dir "$sourceFolder" "${versions[@]}"
 
