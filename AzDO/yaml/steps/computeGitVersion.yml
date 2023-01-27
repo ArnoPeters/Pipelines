@@ -18,6 +18,9 @@ steps:
       $buildNumber = ('$(Build.BuildNumber)' -split ' ')[0]
       Write-Host "##vso[build.updatebuildnumber]$buildNumber"  
 
+      Write-Host "[$(system.pullrequest.sourcebranch)]"
+      Write-Host "[$(system.pullrequest.targetbranch)]"
+
       if('$(Build.SourceBranch)' -ne '${{ parameters.rootBranchName }}' )  
       {
         if ('$(system.pullrequest.sourcebranch)' -ne '') {
