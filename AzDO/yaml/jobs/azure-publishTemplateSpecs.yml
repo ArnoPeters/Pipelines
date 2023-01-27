@@ -32,6 +32,7 @@ jobs:
     submodules: true
     persistCredentials: true
   - template: ../steps/computeGitVersion.yml
+    parameters:
       gitVersionConfigFilePath: ${{ parameters.gitVersionConfigFilePath }}
       rootBranchName: ${{ parameters.rootBranchName }}
   - template: ../steps/azure-uploadTemplateSpecs.yml
