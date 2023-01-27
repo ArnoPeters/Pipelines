@@ -17,10 +17,9 @@ steps:
       # Therefore it needs to be cleared and rewritten in case the "rerun failed jobs" button is pressed in Azure Devops -> this resets the build name to the original value, allowing the pipeline to run idempotent.
       $buildNumber = ('$(Build.BuildNumber)' -split ' ')[0]
       Write-Host "##vso[build.updatebuildnumber]$buildNumber"  
-      $sb ='$(system.pullrequest.sourcebranch)'
-      $tb = '$(system.pullrequest.targetbranch)'
-      Write-Host "[$sb]"
-      Write-Host "[$tb]"
+
+      # GitVersion's pre-release label does not work the same for branch builds triggered by a PR versus branch builds that are manually triggered. 
+      # I have not yet figured out if that is changeable in gitconfig.yml, so this is my workaround. 
 
       if('$(Build.SourceBranch)' -ne '${{ parameters.rootBranchName }}' )  
       {
@@ -28,19 +27,19 @@ steps:
         {
           # Manual Branch Build
           $sourceBranch = ('$(system.pullrequest.sourcebranch)' -split '/')[-1]
-          Write-Host "##vso[task.setvariable variable=BUILD_PR_SOURCEBRANCH]-$sourceBranch"  
-          write-host "BUILD_PR_SOURCEBRANCH='-$sourceBranch'"
+          Write-Host "##vso[task.setvariable variable=VERSIONING_PRERELEASELABELWITHDASH]-$sourceBranch"  
+          write-host "VERSIONING_PRERELEASELABELWITHDASH='-$sourceBranch'"
         } else {
           # PR Branch build
-          Write-Host "##vso[task.setvariable variable=BUILD_PR_SOURCEBRANCH]-$(Build.SourceBranchName)"  
-          write-host "BUILD_PR_SOURCEBRANCH='-$(Build.SourceBranchName)'"
+          Write-Host "##vso[task.setvariable variable=VERSIONING_PRERELEASELABELWITHDASH]-$(Build.SourceBranchName)"  
+          write-host "VERSIONING_PRERELEASELABELWITHDASH='-$(Build.SourceBranchName)'"
         }
       } else {
         # Root Build
-        Write-Host "##vso[task.setvariable variable=BUILD_PR_SOURCEBRANCH]"
-        write-host "BUILD_PR_SOURCEBRANCH=''"
+        Write-Host "##vso[task.setvariable variable=VERSIONING_PRERELEASELABELWITHDASH]"
+        write-host "VERSIONING_PRERELEASELABELWITHDASH=''"
       }
-    displayName: 'Versioning - Set BUILD_PR_SOURCEBRANCH'   
+    displayName: 'Versioning - Set VERSIONING_PRERELEASELABELWITHDASH'   
   
   - task: gittools.gittools.setup-gitversion-task.gitversion/setup@0
     displayName: Versioning - Setup Gitversion
@@ -56,7 +55,7 @@ steps:
       configFilePath: ${{ parameters.gitVersionConfigFilePath }}
 
   # - powershell: |
-  #     if('$(BUILD_PR_SOURCEBRANCH)' -ne '')  
+  #     if('$(VERSIONING_PRERELEASELABELWITHDASH)' -ne '')  
   #     {
   #       $sourceBranch = ('$(system.pullrequest.sourcebranch)' -split '/')[-1]
   #       Write-Host "##vso[build.updatebuildnumber]$(Build.BuildNumber) [$sourceBranch-$(Gitversion.AssemblySemFileVer)]"  
@@ -68,7 +67,7 @@ steps:
   #   displayName: 'Versioning - Set VERSIONING_PACKAGEVERSION'     
   
   - powershell: |
-      if('$(BUILD_PR_SOURCEBRANCH)' -ne '')  
+      if('$(VERSIONING_PRERELEASELABELWITHDASH)' -ne '')  
       {
         $packageVersion= "$(Gitversion.InformationalVersion)-$(Gitversion.AssemblySemFileVer)"
       } else {
