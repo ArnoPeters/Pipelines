@@ -12,10 +12,14 @@ parameters:
   
 steps:     
   - powershell: |
-      if(('$(system.pullrequest.targetbranch)' -split '/')[-1] -eq ('${{ parameters.rootBranchName }}' -split '/')[-1])  
+      if('$(Build.SourceBranch)' -ne '${{ parameters.rootBranchName }}' )  
       {
-        $sourceBranch = ('$(system.pullrequest.sourcebranch)' -split '/')[-1]
-        Write-Host "##vso[task.setvariable variable=BUILD_PR_SOURCEBRANCH]-$sourceBranch"  
+        if ('$(system.pullrequest.sourcebranch)' -ne '') {
+          $sourceBranch = ('$(system.pullrequest.sourcebranch)' -split '/')[-1]
+          Write-Host "##vso[task.setvariable variable=BUILD_PR_SOURCEBRANCH]-$sourceBranch"  
+        } else {
+          Write-Host "##vso[task.setvariable variable=BUILD_PR_SOURCEBRANCH]-$(Build.SourceBranchName)"  
+        }
       } else {
         Write-Host "##vso[task.setvariable variable=BUILD_PR_SOURCEBRANCH]"
       }
@@ -34,10 +38,22 @@ steps:
       useConfigFile: true
       configFilePath: ${{ parameters.gitVersionConfigFilePath }}
 
+  # - powershell: |
+  #     if('$(BUILD_PR_SOURCEBRANCH)' -ne '')  
+  #     {
+  #       $sourceBranch = ('$(system.pullrequest.sourcebranch)' -split '/')[-1]
+  #       Write-Host "##vso[build.updatebuildnumber]$(Build.BuildNumber) [$sourceBranch-$(Gitversion.AssemblySemFileVer)]"  
+  #       Write-Host "##vso[task.setvariable variable=VERSIONING_PACKAGEVERSION]$(Gitversion.InformationalVersion)-$(Gitversion.AssemblySemFileVer)"  
+  #     } else {
+  #       Write-Host "##vso[build.updatebuildnumber]$(Build.BuildNumber) [$(Gitversion.AssemblySemFileVer)]" 
+  #       Write-Host "##vso[task.setvariable variable=VERSIONING_PACKAGEVERSION]$(Gitversion.InformationalVersion)" 
+  #     }
+  #   displayName: 'Versioning - Set VERSIONING_PACKAGEVERSION'     
+  
   - powershell: |
       if('$(BUILD_PR_SOURCEBRANCH)' -ne '')  
       {
-        $sourceBranch = ('$(system.pullrequest.sourcebranch)' -split '/')[-1]
+        $sourceBranch = '$(Build.SourceBranchName)'
         Write-Host "##vso[build.updatebuildnumber]$(Build.BuildNumber) [$sourceBranch-$(Gitversion.AssemblySemFileVer)]"  
         Write-Host "##vso[task.setvariable variable=VERSIONING_PACKAGEVERSION]$(Gitversion.InformationalVersion)-$(Gitversion.AssemblySemFileVer)"  
       } else {
