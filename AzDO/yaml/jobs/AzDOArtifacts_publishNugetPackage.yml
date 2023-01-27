@@ -57,7 +57,7 @@ parameters:
 
 jobs:
 - job: ${{ parameters.buildJobName }}
-  displayName: Autoversion and build Nuget package
+  displayName: Autoversion and publish Nuget package
   variables:
     # preventing git shallow clone to fix gitversion error  https://github.com/GitTools/GitVersion/issues/3091
     Agent.Source.Git.ShallowFetchDepth: 0
