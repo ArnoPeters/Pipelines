@@ -99,13 +99,15 @@ steps:
               # Template specs are all stored as ARM anyway, so the file name can be added without keeping the extension
               namespacedFileName="${filePathInSourceFolder////.}.$fileRoot"
 
+              echo "##[group]Uploading $namespacedFileName to $resourceGroupName"
               for version in "${versions[@]}"
               do
                 hasUploadedAnything=true # Not the perfect solution to use global var for this
                 cmd="az ts create --yes --name \"$namespacedFileName\" --version \"$version\" --resource-group \"$resourceGroupName\" --location \"$location\" --template-file \"$pathname\""
-                echo "$cmd"
+                echo "##[command]$cmd"
                 eval "$cmd"
               done
+              echo "##[endgroup]"
             esac
           fi
         done
