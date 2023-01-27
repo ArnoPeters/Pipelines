@@ -47,19 +47,19 @@ steps:
       majorWildcard="${semverMajor}.x.x${preReleaseLabelWithDash}"
       minorWildcard="${semverMajor}.${semverMinor}.x${preReleaseLabelWithDash}"
 
-      echo "Publishing 'semantic' version '${semanticVersion}'"
+      echo "Publishing '${semanticVersion}' as semantic version."
       versions="${semanticVersion}"
 
       # Case insensitive compare
       if [[ "${publishWildcardVersions,,}" == "true" ]]; then 
-        echo "Publishing 'wildcard' versions '${majorWildcard}' and '${minorWildcard}'."
+        echo "Publishing '${majorWildcard}' and '${minorWildcard}' as wildcard versions."
         versions+=("${majorWildcard}" "${minorWildcard}")
       fi
 
       # Case insensitive compare
       if [[ "${publishLatest,,}" == "true" ]]; then 
         if [[ "$preReleaseLabel" == "" ]]; then 
-          echo "Publishing 'latest' as version."
+          echo "Publishing 'latest' as rolling version."
           versions+=("latest")
         else 
           echo "##[warning]Pre-release label present: skipping publish of 'latest' as version."
