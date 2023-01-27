@@ -30,25 +30,27 @@ if [ "$templateParameterFile" != "" ]; then
   params+=" --parameters @$templateParameterFile"
 fi
 
+echo '##[section]Deploy template'
+
 if [ $deploymentLevel == 'Subscription' ]; then
   cmd="az deployment sub create --name $deploymentName --location $resourceLocation --template-file $templateFile $params"
-  echo $cmd
-  eval $cmd
+  echo "##[command]$cmd"
+  eval "$cmd"
 
   cmd="az deployment sub show --name $deploymentName --query properties.outputs"
   echo $cmd
   deploymentoutputs=$(eval $cmd)
 else
   cmd="az deployment group create --name $deploymentName --mode $deploymentMode --resource-group $resourceGroupName --template-file $templateFile $params"
-  echo $cmd
-  eval $cmd
+  echo "##[command]$cmd"
+  eval "$cmd"
 
   cmd="az deployment group show --resource-group $resourceGroupName --name $deploymentName --query properties.outputs"
-  echo $cmd
-  deploymentoutputs=$(eval $cmd)
+  echo "##[command]$cmd"
+  deploymentoutputs=$(eval "$cmd")
 fi
 
-echo 'convert outputs to variables'
+echo '##[section]Convert outputs to variables'
 echo $deploymentoutputs | jq -c '. | to_entries[] | [.key, .value.value, .value.type]' |
   while IFS=$"\n" read -r c; do
     keyname=$(echo "$c" | jq -r '.[0]')
@@ -57,12 +59,12 @@ echo $deploymentoutputs | jq -c '. | to_entries[] | [.key, .value.value, .value.
     
     if [ "$type" == "SecureString" ]; then
       echo "##vso[task.setvariable variable=$outputVariableNamePrefix$keyname;issecret=true]$value"
-      echo "Added variable '$keyname' ('$type')"
+      echo "Added variable '$keyname' ('$type') with secret value '******'"
     elif [ "$type" == "String" ]; then 
       echo "##vso[task.setvariable variable=$outputVariableNamePrefix$keyname]$value"
       echo "Added variable '$keyname' ('$type') with value '$value'"
     else 
-      echo "Skipped output variable conversion: Type '$type' is not supported for '$keyname'"
+      echo "##[warning]Skipped output variable conversion: Type '$type' is not supported for '$keyname'"
     fi
     
-  done
+  done    

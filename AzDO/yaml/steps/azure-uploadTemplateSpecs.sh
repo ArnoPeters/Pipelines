@@ -14,6 +14,7 @@
 # publishLatest="True"
 
 # --- Script start --- 
+echo "##[section]Determining version labels"
 if [[ ( "$preReleaseLabel" != "" ) && ( $preReleaseLabel != -* ) ]]; then 
   preReleaseLabelWithDash="-$preReleaseLabel"
 fi
@@ -22,22 +23,22 @@ semanticVersion="${semverMajor}.${semverMinor}.${semverPatch}${preReleaseLabelWi
 majorWildcard="${semverMajor}.x.x${preReleaseLabelWithDash}"
 minorWildcard="${semverMajor}.${semverMinor}.x${preReleaseLabelWithDash}"
 
-echo "Publishing 'semantic' version '${semanticVersion}'"
+echo "Publishing '${semanticVersion}' as semantic version."
 versions="${semanticVersion}"
 
 # Case insensitive compare
 if [[ "${publishWildcardVersions,,}" == "true" ]]; then 
-  echo "Publishing 'wildcard' versions '${majorWildcard}' and '${minorWildcard}'."
+  echo "Publishing '${majorWildcard}' and '${minorWildcard}' as wildcard versions."
   versions+=("${majorWildcard}" "${minorWildcard}")
 fi
 
 # Case insensitive compare
 if [[ "${publishLatest,,}" == "true" ]]; then 
   if [[ "$preReleaseLabel" == "" ]]; then 
-    echo "Publishing 'latest' as version."
+    echo "Publishing 'latest' as rolling version."
     versions+=("latest")
   else 
-    echo "Pre-release label present: skipping publish of 'latest' as version."
+    echo "##[warning]Pre-release label present: skipping publish of 'latest' as version."
   fi
 fi
 
@@ -51,7 +52,7 @@ if [[ $sourceFolder == /* ]]; then
   sourceFolder=".$sourceFolder" 
 fi
 
-hasUploadedAnyhting=false
+hasUploadedAnything=false
 
 #https://unix.stackexchange.com/a/494146
 function walk_dir () {    
@@ -75,21 +76,24 @@ function walk_dir () {
         # Template specs are all stored as ARM anyway, so the file name can be added without keeping the extension
         namespacedFileName="${filePathInSourceFolder////.}.$fileRoot"
 
+        echo "##[group]Publishing [$pathname] as [$namespacedFileName]"
         for version in "${versions[@]}"
         do
-          hasUploadedAnyhting=true # Not the perfect solution to use global var for this
+          hasUploadedAnything=true # Not the perfect solution to use global var for this
           cmd="az ts create --yes --name \"$namespacedFileName\" --version \"$version\" --resource-group \"$resourceGroupName\" --location \"$location\" --template-file \"$pathname\""
-          echo "$cmd"
+          echo "##[command]$cmd"
           eval "$cmd"
         done
+        echo "##[endgroup]"
       esac
     fi
   done
 }
+echo "##[section]Publish Template Specs to resource group [$resourceGroupName]"
 
 walk_dir "$sourceFolder" "${versions[@]}"
 
-if [ hasUploadedAnyhting ]; then 
+if $hasUploadedAnything ; then 
   exit 0
 else 
   exit 1
