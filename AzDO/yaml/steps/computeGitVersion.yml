@@ -17,9 +17,10 @@ steps:
       # Therefore it needs to be cleared and rewritten in case the "rerun failed jobs" button is pressed in Azure Devops -> this resets the build name to the original value, allowing the pipeline to run idempotent.
       $buildNumber = ('$(Build.BuildNumber)' -split ' ')[0]
       Write-Host "##vso[build.updatebuildnumber]$buildNumber"  
-
-      Write-Host "[$(system.pullrequest.sourcebranch)]"
-      Write-Host "[$(system.pullrequest.targetbranch)]"
+      $sb ='$(system.pullrequest.sourcebranch)'
+      $tb = '$(system.pullrequest.targetbranch)'
+      Write-Host "[$sb]"
+      Write-Host "[$tb]"
 
       if('$(Build.SourceBranch)' -ne '${{ parameters.rootBranchName }}' )  
       {
