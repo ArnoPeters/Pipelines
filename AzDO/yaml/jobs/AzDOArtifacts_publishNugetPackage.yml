@@ -51,6 +51,9 @@ parameters:
   default: {
     vmImage: 'windows-latest'
   }
+- name: publishPreRelease
+  type: boolean
+  default: false
 
 jobs:
 - job: ${{ parameters.buildJobName }}
@@ -58,6 +61,9 @@ jobs:
   variables:
     # preventing git shallow clone to fix gitversion error  https://github.com/GitTools/GitVersion/issues/3091
     Agent.Source.Git.ShallowFetchDepth: 0
+    isRelease: ${{ eq(variables['Build.SourceBranch'], parameters.rootBranchName) }}
+    shouldPublishPackage: ${{ or (eq(variables.isRelease, 'True'), and(ne(variables.isRelease, 'True') , parameters.publishPreRelease))  }}
+    shouldPublishSymbols: ${{ and(eq(parameters.publishSymbols, 'True'),eq(variables.shouldPublishPackage, 'True')) }} #publishSymbols && shouldpublishpackage
   dependsOn: ${{ parameters.dependsOn }}
   condition: succeeded()
   workspace:
@@ -75,14 +81,7 @@ jobs:
 
   - ${{ parameters.buildSteps }}
 
-  - script: |
-      git tag v$(Gitversion.MajorMinorPatch)
-      git push origin "v$(Gitversion.MajorMinorPatch)"
-    condition: and(succeeded(), eq('${{ variables['Build.SourceBranch'] }}', '${{ parameters.rootBranchName }}'))
-    workingDirectory: $(Build.SourcesDirectory)
-    displayName: Versioning - Tag commit on release
-
-  - ${{ if parameters.publishSymbols }}:
+  - ${{ if eq(variables.shouldPublishSymbols, 'True') }}:
     - task: CopyFiles@2
       displayName: Symbols - Collect ${{ parameters.pdbFilter }} for '${{ parameters.pdbArtifactName }}' artifact
       inputs:
@@ -90,23 +89,29 @@ jobs:
         targetFolder: '$(Build.ArtifactStagingDirectory)/${{ parameters.pdbArtifactName }}'
         flattenFolders: true
 
-  - ${{ if parameters.publishSymbols }}:
+  - ${{ if eq(variables.shouldPublishSymbols, 'True') }}:
     - task: PublishPipelineArtifact@1
       displayName: Symbols - Publish '${{ parameters.pdbArtifactName }}' artifact
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)/${{ parameters.pdbArtifactName }}'
         artifactName: '${{ parameters.pdbArtifactName }}'
 
-  - task: DotNetCoreCLI@2
-    displayName: 'NuGet - Push package(s) to [${{ parameters.azureArtifactsTargetFeed }}]'
-    inputs:
-      command: push
-      nuGetFeedType: 'internal'
-      packagesToPush: '$(System.DefaultWorkingDirectory)/src/**/*.nupkg'
-      publishVstsFeed: '${{ parameters.azureArtifactsTargetFeed }}'
+  - ${{ if eq(variables.shouldPublishPackage, 'True') }}:
+    - task: DotNetCoreCLI@2
+      displayName: 'NuGet - Push package(s) to [${{ parameters.azureArtifactsTargetFeed }}]'
+      inputs:
+        command: push
+        nuGetFeedType: 'internal'
+        packagesToPush: '$(System.DefaultWorkingDirectory)/src/**/*.nupkg'
+        publishVstsFeed: '${{ parameters.azureArtifactsTargetFeed }}'
+
+  - ${{ if eq(variables.isRelease, 'True') }}:
+    - template: ../steps/tagCommit.yml
+      parameters:
+        value: 'v$(Gitversion.MajorMinorPatch)'
 
 # Separate job to ensure that it is running on windows (as it won't work on linux)
-- ${{ if parameters.publishSymbols }}:
+- ${{ if eq(variables.shouldPublishSymbols, 'True') }}:
   - template: AzDOArtifacts_publishPdbSymbols.yml
     parameters:
       pdbArtifactName: ${{ parameters.pdbArtifactName }}
