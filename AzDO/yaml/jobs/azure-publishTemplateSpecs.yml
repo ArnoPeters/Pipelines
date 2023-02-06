@@ -44,7 +44,7 @@ jobs:
       semverMajor: '$(Gitversion.Major)'
       semverMinor: '$(Gitversion.Minor)'
       semverPatch: '$(Gitversion.Patch)'
-      preReleaseLabel: '$(BUILD_PR_SOURCEBRANCH)'
+      preReleaseLabel: '$(VERSIONING_PRERELEASELABELWITHDASH)'
       publishWildcardVersions: ${{ parameters.publishWildcardVersions  }}
       publishLatest: ${{ parameters.publishLatest  }}
   - template: ../steps/tagCommit.yml

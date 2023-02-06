@@ -15,8 +15,12 @@
 
 # --- Script start --- 
 echo "##[section]Determining version labels"
-if [[ ( "$preReleaseLabel" != "" ) && ( $preReleaseLabel != -* ) ]]; then 
-  preReleaseLabelWithDash="-$preReleaseLabel"
+if [[ ( "$preReleaseLabel" != "" ) ]]; then 
+  if [[ ( $preReleaseLabel != -* ) ]]; then 
+    preReleaseLabelWithDash="-$preReleaseLabel"
+  else
+    preReleaseLabelWithDash="$preReleaseLabel"
+  fi
 fi
 
 semanticVersion="${semverMajor}.${semverMinor}.${semverPatch}${preReleaseLabelWithDash}"
