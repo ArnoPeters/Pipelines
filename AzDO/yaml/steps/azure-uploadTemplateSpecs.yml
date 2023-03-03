@@ -108,7 +108,7 @@ steps:
                 echo "##[group]Publishing [$pathname] as [$namespacedFileName]"
                 for version in "${versions[@]}"
                 do
-                  hasUploadedAnything=true #TODO: It's not exactly elegant to use a global var for this, but it works. Should be a return value of the function. 
+                  hasUploadedAnything=true #It's quite ugly to use a global var for this, but it works.
                   cmd="az ts create --yes --name \"$namespacedFileName\" --version \"$version\" --resource-group \"$resourceGroupName\" --location \"$location\" --template-file \"$pathname\""
                   echo "##[command]$cmd"
                   eval "$cmd"
