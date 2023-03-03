@@ -1,3 +1,6 @@
+# For optimal effect, set the build name in the root yaml file to
+# name: $(date:yyyy.M.d)$(rev:.r) 
+
 # Azure Devops Marketplace tasks used in this template: 
 # - https://marketplace.visualstudio.com/items?itemName=gittools.gittools
 
