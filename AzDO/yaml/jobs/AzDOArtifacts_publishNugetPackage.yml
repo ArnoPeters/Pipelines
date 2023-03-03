@@ -1,4 +1,7 @@
 # Full workflow for creating a pipeline in Azure Devops to create nuget packages from an Azure Devops Git repo, to be published to Azure Devops Artifacts. 
+# For optimal effect, set the build name in the root yaml file to
+# name: $(date:yyyy.M.d)$(rev:.r) 
+#
 # Features: 
 #   - Pre-release on Pull Request
 #   - Full release when a Pull Request is accepted and merged
