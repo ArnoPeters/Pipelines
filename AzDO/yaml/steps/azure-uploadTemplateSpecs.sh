@@ -6,7 +6,7 @@
 # semverMinor='2'
 # semverPatch='3'
 # preReleaseLabel="TEST"
-# resourceGroupName="TemplateSpecs2"
+# resourceGroupName="TemplateSpecs"
 # location="westeurope"
 # sourceFolder="/Azure/Arm&Bicep"
 # filter='*.json|*.bicep'
@@ -14,6 +14,7 @@
 # publishLatest="True"
 
 # --- Script start --- 
+set -e
 echo "##[section]Determining version labels"
 if [[ ( "$preReleaseLabel" != "" ) ]]; then 
   if [[ ( $preReleaseLabel != -* ) ]]; then 
@@ -59,43 +60,48 @@ fi
 hasUploadedAnything=false
 
 #https://unix.stackexchange.com/a/494146
-function walk_dir () {    
+function dir_upload_templatespecs () {    
   shopt -s nullglob dotglob extglob
   local path=$1
+  echo "##[debug] --- Scan of Directory [$path] STARTED ---"
   shift 1
   local -a versions=("$@")
   for pathname in "$path"/*; do
     if [ -d "$pathname" ]; then
-      walk_dir "$pathname" "${versions[@]}"
+      dir_upload_templatespecs "$pathname" "${versions[@]}"
     else
       case "$pathname" in
         $filter)
-      
-        fileRoot="$(basename "$pathname" | sed 's/\(.*\)\..*/\1/')"
-        fileDir="${pathname%/*}"
+          fileRoot="$(basename "$pathname" | sed 's/\(.*\)\..*/\1/')"
+          fileDir="${pathname%/*}"
 
-        # Template specs do not support folders, so the file path relative to the source folder is converted to a dot (.) separated "namespace"
-        filePathInSourceFolder=${fileDir#"$sourceFolder"}
-        filePathInSourceFolder=${filePathInSourceFolder#"/"}
-        # Template specs are all stored as ARM anyway, so the file name can be added without keeping the extension
-        namespacedFileName="${filePathInSourceFolder////.}.$fileRoot"
+          # Template specs do not support folders, so the file path relative to the source folder is converted to a dot (.) separated "namespace"
+          filePathInSourceFolder=${fileDir#"$sourceFolder"}
+          filePathInSourceFolder=${filePathInSourceFolder#"/"}
+          # Template specs are all stored as ARM anyway, so the file name can be added without keeping the extension
+          namespacedFileName="${filePathInSourceFolder////.}.$fileRoot"
 
-        echo "##[group]Publishing [$pathname] as [$namespacedFileName]"
-        for version in "${versions[@]}"
-        do
-          hasUploadedAnything=true # Not the perfect solution to use global var for this
-          cmd="az ts create --yes --name \"$namespacedFileName\" --version \"$version\" --resource-group \"$resourceGroupName\" --location \"$location\" --template-file \"$pathname\""
-          echo "##[command]$cmd"
-          eval "$cmd"
-        done
-        echo "##[endgroup]"
+          echo "##[group]Publishing [$pathname] as [$namespacedFileName]"
+          for version in "${versions[@]}"
+          do
+            hasUploadedAnything=true #It's quite ugly to use a global var for this, but it works.
+            cmd="az ts create --yes --name \"$namespacedFileName\" --version \"$version\" --resource-group \"$resourceGroupName\" --location \"$location\" --template-file \"$pathname\""
+            echo "##[command]$cmd"
+            eval "$cmd"
+          done
+          echo "##[endgroup]"
+        ;;   
+        *)
+          echo "##[debug] SKIP: $pathname NOT in $filter"
+        ;;  
       esac
     fi
   done
+  echo "##[debug] --- Scan of Directory [$path] COMPLETED ---"
 }
 echo "##[section]Publish Template Specs to resource group [$resourceGroupName]"
 
-walk_dir "$sourceFolder" "${versions[@]}"
+dir_upload_templatespecs "$sourceFolder" "${versions[@]}"
 
 if $hasUploadedAnything ; then 
   exit 0
