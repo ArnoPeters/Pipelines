@@ -1,13 +1,13 @@
 parameters:
   publishFolder: '$(build.artifactstagingdirectory)'
-  artifactName: 'BicepTemplates'
+  artifactName: 'IACTemplates'
   flattenApplicationFolders: false
   applicationTemplatesFolder: 
   jsonFilter: '**/*.json'
 
 jobs:
-- job: PublishApplicationBicepTemplates
-  displayName: Publish APPLICATION BICEP templates to artifacts
+- job: PublishApplicationIACTemplates
+  displayName: Publish Application IAC templates to artifacts
   pool:
     vmImage: 'ubuntu-latest'
   steps:
@@ -15,21 +15,21 @@ jobs:
     clean: true
 
   - task: CopyFiles@2
-    displayName: Copy Application BICEP templates
+    displayName: Copy Application IAC templates
     inputs:
       sourceFolder: '${{ parameters.applicationTemplatesFolder }}'
       contents: |
         **/*.ps1
         **/*.psm1
-        **/*.bicep
+        **/*.IAC
         ${{ parameters.jsonFilter }}
         !**/.vscode/**/*.json
-      targetFolder: '${{ parameters.publishFolder }}/ApplicationTemplates'
+      targetFolder: '${{ parameters.publishFolder }}/IAC'
       flattenFolders: ${{ parameters.flattenApplicationFolders }}
 
   - task: PublishBuildArtifacts@1
-    displayName: Publish '${{ parameters.publishFolder }}/ApplicationTemplates' to pipeline artifacts
+    displayName: Publish '${{ parameters.publishFolder }}/IAC' to pipeline artifacts
     inputs:
-      pathToPublish: '${{ parameters.publishFolder }}/ApplicationTemplates'
+      pathToPublish: '${{ parameters.publishFolder }}/IAC'
       artifactName: 'Application_${{ parameters.artifactName }}'
       artifactType: container
