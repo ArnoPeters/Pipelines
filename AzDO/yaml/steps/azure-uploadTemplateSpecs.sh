@@ -17,6 +17,8 @@
 set -e
 echo "##[section]Determining version labels"
 if [[ ( "$preReleaseLabel" != "" ) ]]; then 
+  publishWildcardVersions='false'
+  publishLatest='false'
   if [[ ( $preReleaseLabel != -* ) ]]; then 
     preReleaseLabelWithDash="-$preReleaseLabel"
   else
@@ -63,7 +65,7 @@ hasUploadedAnything=false
 function dir_upload_templatespecs () {    
   shopt -s nullglob dotglob extglob
   local path=$1
-  echo "##[debug] --- Scan of Directory [$path] STARTED ---"
+  #echo "##[debug] --- Scan of Directory [$path] STARTED ---"
   shift 1
   local -a versions=("$@")
   for pathname in "$path"/*; do
@@ -72,11 +74,11 @@ function dir_upload_templatespecs () {
     else
       case "$pathname" in
         $filter)
-          fileRoot="$(basename "$pathname" | sed 's/\(.*\)\..*/\1/')"
-          fileDir="${pathname%/*}"
+          local fileRoot="$(basename "$pathname" | sed 's/\(.*\)\..*/\1/')"
+          local fileDir="${pathname%/*}"
 
           # Template specs do not support folders, so the file path relative to the source folder is converted to a dot (.) separated "namespace"
-          filePathInSourceFolder=${fileDir#"$sourceFolder"}
+          local filePathInSourceFolder=${fileDir#"$sourceFolder"}
           filePathInSourceFolder=${filePathInSourceFolder#"/"}
           # Template specs are all stored as ARM anyway, so the file name can be added without keeping the extension
           namespacedFileName="${filePathInSourceFolder////.}.$fileRoot"
@@ -85,7 +87,7 @@ function dir_upload_templatespecs () {
           for version in "${versions[@]}"
           do
             hasUploadedAnything=true #It's quite ugly to use a global var for this, but it works.
-            cmd="az ts create --yes --name \"$namespacedFileName\" --version \"$version\" --resource-group \"$resourceGroupName\" --location \"$location\" --template-file \"$pathname\""
+            local cmd="az ts create --yes --name \"$namespacedFileName\" --version \"$version\" --resource-group \"$resourceGroupName\" --location \"$location\" --template-file \"$pathname\""
             echo "##[command]$cmd"
             eval "$cmd"
           done
@@ -97,7 +99,7 @@ function dir_upload_templatespecs () {
       esac
     fi
   done
-  echo "##[debug] --- Scan of Directory [$path] COMPLETED ---"
+  #echo "##[debug] --- Scan of Directory [$path] COMPLETED ---"
 }
 echo "##[section]Publish Template Specs to resource group [$resourceGroupName]"
 
