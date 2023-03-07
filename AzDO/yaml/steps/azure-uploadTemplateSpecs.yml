@@ -89,7 +89,7 @@ steps:
       function dir_upload_templatespecs () {    
         shopt -s nullglob dotglob extglob
         local path=$1
-        echo "##[debug] --- Scan of Directory [$path] STARTED ---"
+        #echo "##[debug] --- Scan of Directory [$path] STARTED ---"
         shift 1
         local -a versions=("$@")
         for pathname in "$path"/*; do
@@ -123,7 +123,7 @@ steps:
             esac
           fi
         done
-        echo "##[debug] --- Scan of Directory [$path] COMPLETED ---"
+        #echo "##[debug] --- Scan of Directory [$path] COMPLETED ---"
       }
       echo "##[section]Publish Template Specs to resource group [$resourceGroupName]"
 
