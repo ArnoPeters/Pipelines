@@ -96,11 +96,11 @@ steps:
           else
             case "$pathname" in
               $filter)
-                fileRoot="$(basename "$pathname" | sed 's/\(.*\)\..*/\1/')"
-                fileDir="${pathname%/*}"
+                local fileRoot="$(basename "$pathname" | sed 's/\(.*\)\..*/\1/')"
+                local fileDir="${pathname%/*}"
 
                 # Template specs do not support folders, so the file path relative to the source folder is converted to a dot (.) separated "namespace"
-                filePathInSourceFolder=${fileDir#"$sourceFolder"}
+                local filePathInSourceFolder=${fileDir#"$sourceFolder"}
                 filePathInSourceFolder=${filePathInSourceFolder#"/"}
                 # Template specs are all stored as ARM anyway, so the file name can be added without keeping the extension
                 namespacedFileName="${filePathInSourceFolder////.}.$fileRoot"
@@ -109,7 +109,7 @@ steps:
                 for version in "${versions[@]}"
                 do
                   hasUploadedAnything=true #It's quite ugly to use a global var for this, but it works.
-                  cmd="az ts create --yes --name \"$namespacedFileName\" --version \"$version\" --resource-group \"$resourceGroupName\" --location \"$location\" --template-file \"$pathname\""
+                  local cmd="az ts create --yes --name \"$namespacedFileName\" --version \"$version\" --resource-group \"$resourceGroupName\" --location \"$location\" --template-file \"$pathname\""
                   echo "##[command]$cmd"
                   eval "$cmd"
                 done
