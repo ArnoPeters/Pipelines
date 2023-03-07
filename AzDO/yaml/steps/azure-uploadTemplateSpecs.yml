@@ -41,6 +41,8 @@ steps:
       set -e
       echo "##[section]Determining version labels"
       if [[ ( "$preReleaseLabel" != "" ) ]]; then 
+        publishWildcardVersions='false'
+        publishLatest='false'
         if [[ ( $preReleaseLabel != -* ) ]]; then 
           preReleaseLabelWithDash="-$preReleaseLabel"
         else
