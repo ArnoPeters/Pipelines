@@ -1,0 +1,3 @@
+steps:
+- powershell: 'Get-ChildItem -Path Env:\ | Format-Table  -AutoSize | Out-String -Width 10000'
+  displayName: 'List all environment variables'
