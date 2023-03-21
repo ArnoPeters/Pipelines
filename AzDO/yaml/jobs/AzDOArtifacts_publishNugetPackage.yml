@@ -98,7 +98,13 @@ jobs:
       inputs:
         targetPath: '$(Build.ArtifactStagingDirectory)/${{ parameters.pdbArtifactName }}'
         artifactName: '${{ parameters.pdbArtifactName }}'
-
+  
+  # Tag the source even if the package upload fails later - better to republish with a gap in the version, than not tagging -> not tagging causes failed uploads when retrying. 
+  - ${{ if eq(variables.isRelease, 'True') }}:
+    - template: ../steps/tagCommit.yml
+      parameters:
+        value: 'v$(Gitversion.MajorMinorPatch)'
+  
   - ${{ if eq(variables.shouldPublishPackage, 'True') }}:
     - task: DotNetCoreCLI@2
       displayName: 'NuGet - Push package(s) to [${{ parameters.azureArtifactsTargetFeed }}]'
@@ -107,11 +113,6 @@ jobs:
         nuGetFeedType: 'internal'
         packagesToPush: '$(System.DefaultWorkingDirectory)/src/**/*.nupkg'
         publishVstsFeed: '${{ parameters.azureArtifactsTargetFeed }}'
-
-  - ${{ if eq(variables.isRelease, 'True') }}:
-    - template: ../steps/tagCommit.yml
-      parameters:
-        value: 'v$(Gitversion.MajorMinorPatch)'
 
 # Separate job to ensure that it is running on windows (as it won't work on linux)
 - ${{ if eq(variables.shouldPublishSymbols, 'True') }}:
