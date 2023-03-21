@@ -7,7 +7,7 @@
 parameters:
 - name: 'gitVersionConfigFilePath'
   type: string
-  default: 'GitVersion.yml'
+  default: '.pipelines/GitVersion.yml'
 - name: 'rootBranchName'
   displayName: 'Name of the root branch of the repository triggering the build.'
   type: string
@@ -56,18 +56,6 @@ steps:
     inputs:
       useConfigFile: true
       configFilePath: ${{ parameters.gitVersionConfigFilePath }}
-
-  # - powershell: |
-  #     if('$(VERSIONING_PRERELEASELABELWITHDASH)' -ne '')  
-  #     {
-  #       $sourceBranch = ('$(system.pullrequest.sourcebranch)' -split '/')[-1]
-  #       Write-Host "##vso[build.updatebuildnumber]$(Build.BuildNumber) [$sourceBranch-$(Gitversion.AssemblySemFileVer)]"  
-  #       Write-Host "##vso[task.setvariable variable=VERSIONING_PACKAGEVERSION]$(Gitversion.InformationalVersion)-$(Gitversion.AssemblySemFileVer)"  
-  #     } else {
-  #       Write-Host "##vso[build.updatebuildnumber]$(Build.BuildNumber) [$(Gitversion.AssemblySemFileVer)]" 
-  #       Write-Host "##vso[task.setvariable variable=VERSIONING_PACKAGEVERSION]$(Gitversion.InformationalVersion)" 
-  #     }
-  #   displayName: 'Versioning - Set VERSIONING_PACKAGEVERSION'     
   
   - powershell: |
       if('$(VERSIONING_PRERELEASELABELWITHDASH)' -ne '')  
