@@ -8,8 +8,6 @@ parameters:
 jobs:
 - job: PublishApplicationIACTemplates
   displayName: Publish Application IAC templates to artifacts
-  pool:
-    vmImage: 'ubuntu-latest'
   steps:
   - checkout: self
     clean: true
