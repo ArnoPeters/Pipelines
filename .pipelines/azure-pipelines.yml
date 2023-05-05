@@ -1,0 +1,35 @@
+## This generates an ever-increasing number based on the date and build. Useful for CI\CD scenario's.
+name: $(date:yyyy.M.d)$(rev:.r) 
+
+## GITHUB: specify the Pull Request Builds in yaml as below.
+## Azure Devops: setup Pull Request Builds via "manage repositories" - "Branch Policies" in the Azure Devops UI instead. 
+# pr:
+#   branches:
+#     include:
+#     - main
+
+## Azure Devops: The trigger specified below is only evaluated if the build is triggered by YAML, not by a Branch Policy
+## Therefore the excluded trigger paths must also manually be added to the the Pull Request Builds in the Azure Devops UI. 
+## The path filter for the branches below would be *; !/.vscode/*; !/docs/*; !/*.md 
+trigger:
+  branches:
+    include: 
+    - main
+  paths:
+    include:
+    - /AzDO/Task Groups/*
+
+resources:
+  repositories:
+    - repository: self
+      clean: true
+
+stages:
+- stage: Build
+  displayName: Buildstage
+  pool: #default 
+    vmImage: 'ubuntu-latest'
+  jobs:
+  - template: /AzDO/yaml/jobs/AzDO_uploadTaskgroups.yml
+    parameters: 
+      taskGroupFolderPath: 'AzDO/Task Groups'

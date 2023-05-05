@@ -1,0 +1,64 @@
+parameters:
+- name: taskGroupFolderPath
+  type: string
+  displayName: "Path in repository to the folder with taskgroups."
+
+jobs:
+- job: UploadTaskgroups
+  displayName: Upload Taskgroups to Azure Devops
+  steps:
+  - powershell: |
+      $exit = 0
+
+      # https://learn.microsoft.com/en-us/rest/api/azure/devops/distributedtask/taskgroups/list?view=azure-devops-rest-5.0&tabs=HTTP
+
+      $url = "$($env:SYSTEM_TEAMFOUNDATIONCOLLECTIONURI)$env:SYSTEM_TEAMPROJECTID/_apis/distributedtask/taskgroups?api-version=5.0-preview.1"
+      $headers = @{
+        Authorization = "Bearer $env:SYSTEM_ACCESSTOKEN"
+      }
+
+      write-host ("##[section]Getting list of existing Task Groups")
+
+      $existingTaskGroups = (Invoke-RestMethod -Uri $url -Method 'Get' -Headers $headers)
+      write-host ("Found {0} existing Task Groups" -f $existingTaskGroups.count)
+
+      write-host ("##[section]Uploading Task Groups from repository")
+
+      Get-ChildItem "${{ parameters.taskGroupFolderPath }}" -Filter *.json | 
+      Foreach-Object {
+        write-host ("##[group]Processing '{0}'" -f $_.Name)
+        try {
+          $taskGroupName = $_.BaseName
+          $taskgroupJsonObject =  Get-Content -path $_.FullName | ConvertFrom-Json
+          $taskgroupJsonObject.name = $taskGroupName
+
+          $item = ( $existingTaskGroups.value | Where-Object {$_.name -eq $taskGroupName})
+
+          if ($item) {
+            write-host "Task group with same name already exists: updating."
+            write-host ("##[debug]Found existing id: '{0}'." -f $item.id) 
+            write-host ("##[debug]Found existing revision: '{0}'." -f $item.revision) 
+
+            $taskgroupJsonObject.id = $item.id
+            $taskgroupJsonObject.revision = $item.revision
+            $method = "Put"
+          } else {
+            write-host "Task group with same name not found: adding."
+            
+            $method = "Post"
+          }
+
+          $json = ($taskgroupJsonObject | ConvertTo-Json -depth 100 -Compress )
+
+          Invoke-RestMethod -Uri $url -Method $method -Headers $headers -Body $json -ContentType 'application/json' 
+          
+        } catch {
+          write-host ("##[error]{0}" -f $_)
+          $exit = 1
+        }
+        write-host "##[endgroup]"
+      }
+      exit $exit
+    displayName: 'Upload "${{ parameters.taskGroupFolderPath }}" to Azure Devops'   
+    env:
+      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
