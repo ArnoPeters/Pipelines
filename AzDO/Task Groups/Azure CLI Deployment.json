@@ -2,7 +2,7 @@
 	"tasks": [
 		{
 			"environment": {},
-			"displayName": "Azure CLI - Deployment to Azure",
+			"displayName": "[$(taskLabel)] - Azure CLI Deployment",
 			"alwaysRun": false,
 			"continueOnError": false,
 			"condition": "succeeded()",
@@ -14,7 +14,7 @@
 				"scriptType": "bash",
 				"scriptLocation": "inlineScript",
 				"scriptPath": "",
-				"inlineScript": "deploymentName='$(deploymentName)'\ndeploymentMode='$(deploymentMode)'\ndeploymentLevel='$(deploymentLevel)'\noutputVariableNamePrefix='$(outputVariableNamePrefix)'\nparameterOverrides='$(parameterOverrides)'\nresourceLocation='$(resourceLocation)'\nresourceGroupName='$(resourcegroupName)'\ntemplateFile='$(templateFile)'\ntemplateParameterFile='$(templateParameterFile)'\n\n# Path sanitizing\ntemplateFile=\"${templateFile//\\\\//}\"\ntemplateParameterFile=\"${templateParameterFile//\\\\//}\"\n\nif [ \"$deploymentName\" == \"\" ]; then \n  deploymentName=\"$(date +%Y%m%d-%H%M%S)-deployment\"\nfi\n\nparams=\"\"\nif [ \"$parameterOverrides\" != \"\" ]; then \n  params+=\" --parameters $parameterOverrides\"\nfi\nif [ \"$templateParameterFile\" != \"\" ]; then \n  params+=\" --parameters @$templateParameterFile\"\nfi\n\nif [ $deploymentLevel == 'Subscription' ]; then\n  cmd=\"az deployment sub create --name $deploymentName --location $resourceLocation --template-file $templateFile $params\"\n  echo $cmd\n  eval $cmd\n\n  cmd=\"az deployment sub show --name $deploymentName --query properties.outputs\"\n  echo $cmd\n  deploymentoutputs=$(eval $cmd)\nelse\n  cmd=\"az deployment group create --name $deploymentName --mode $deploymentMode --resource-group $resourceGroupName --template-file $templateFile $params\"\n  echo $cmd\n  eval $cmd\n\n  cmd=\"az deployment group show --resource-group $resourceGroupName --name $deploymentName --query properties.outputs\"\n  echo $cmd\n  deploymentoutputs=$(eval $cmd)\nfi\n\necho 'convert outputs to variables'\necho $deploymentoutputs | jq -c '. | to_entries[] | [.key, .value.value, .value.type]' |\n  while IFS=$\"\\n\" read -r c; do\n    keyname=$(echo \"$c\" | jq -r '.[0]')\n    value=$(echo \"$c\" | jq -r '.[1]')\n    type=$(echo \"$c\" | jq -r '.[2]')\n    \n    if [ \"$type\" == \"SecureString\" ]; then\n      echo \"##vso[task.setvariable variable=$outputVariableNamePrefix$keyname;issecret=true]$value\"\n      echo \"Added variable '$keyname' ('$type')\"\n    elif [ \"$type\" == \"String\" ]; then \n      echo \"##vso[task.setvariable variable=$outputVariableNamePrefix$keyname]$value\"\n      echo \"Added variable '$keyname' ('$type') with value '$value'\"\n    else \n      echo \"Skipped output variable conversion: Type '$type' is not supported for '$keyname'\"\n    fi\n    \n  done",
+				"inlineScript": "deploymentName='$(deploymentName)'\ndeploymentMode='$(deploymentMode)'\ndeploymentLevel='$(deploymentLevel)'\noutputVariableNamePrefix='$(outputVariableNamePrefix)'\nparameterOverrides=$'$(parameterOverrides)'\nresourceLocation='$(resourceLocation)'\nresourceGroupName='$(resourceGroupName)'\ntemplateFile='$(templateFile)'\ntemplateParameterFile='$(templateParameterFile)'\n\n\n\n# Path sanitizing for Linux\ntemplateFile=\"${templateFile//\\\\//}\"\ntemplateParameterFile=\"${templateParameterFile//\\\\//}\"\n\nif [ \"$deploymentName\" == \"\" ]; then \n  deploymentName=\"$(date +%Y%m%d-%H%M%S)-deployment\"\nfi\n\nparams=\"\"\nif [ \"$parameterOverrides\" != \"\" ]; then \n  params+=$\" --parameters $parameterOverrides\"\nfi\nif [ \"$templateParameterFile\" != \"\" ]; then \n  params+=\" --parameters \\\"@$templateParameterFile\\\"\"\nfi\n\n{\n  echo '##[section]Deploy template'\n  if [ $deploymentLevel == 'subscription' ]; then\n  {\n    cmd=\"az deployment sub create --name \\\"$deploymentName\\\" --location \\\"$resourceLocation\\\" --template-file \\\"$templateFile\\\" $params\"\n    echo \"##[command]$cmd\"\n    eval \"$cmd\"\n  } && {\n    cmd=\"az deployment sub show --name \\\"$deploymentName\\\" --query properties.outputs\"\n    echo $cmd\n    deploymentoutputs=$(eval $cmd)\n  }\n  else\n  {\n    cmd=\"az deployment group create --name \\\"$deploymentName\\\" --mode \\\"$deploymentMode\\\" --resource-group \\\"$resourceGroupName\\\" --template-file \\\"$templateFile\\\" $params\"\n    echo \"##[command]$cmd\"\n    eval \"$cmd\"\n  } && {\n    cmd=\"az deployment group show --resource-group \\\"$resourceGroupName\\\" --name \\\"$deploymentName\\\" --query properties.outputs\"\n    echo \"##[command]$cmd\"\n    deploymentoutputs=$(eval \"$cmd\")\n  }\nfi\n} && {\n  echo '##[section]Convert outputs to variables'\n  echo $deploymentoutputs | jq -c '. | to_entries[] | [.key, .value.value, .value.type]' |\n    while IFS=$\"\\n\" read -r c; do\n      keyname=$(echo \"$c\" | jq -r '.[0]')\n      value=$(echo \"$c\" | jq -r '.[1]')\n      type=$(echo \"$c\" | jq -r '.[2]')\n      \n      if [ \"$type\" == \"SecureString\" ]; then\n        echo \"##vso[task.setvariable variable=$outputVariableNamePrefix$keyname;issecret=true]$value\"\n        echo \"Added variable '$outputVariableNamePrefix$keyname' ('$type') with secret value '******'\"\n      elif [ \"$type\" == \"String\" ]; then \n        echo \"##vso[task.setvariable variable=$outputVariableNamePrefix$keyname]$value\"\n        echo \"Added variable '$outputVariableNamePrefix$keyname' ('$type') with value '$value'\"\n      else \n        echo \"##[warning]Skipped output variable conversion: Type '$type' is not supported for '$keyname'\"\n      fi\n      \n    done    \n}",
 				"scriptArguments": "",
 				"powerShellErrorActionPreference": "stop",
 				"addSpnToEnvironment": "false",
@@ -34,20 +34,20 @@
 		"Agent",
 		"DeploymentGroup"
 	],
-	"revision": 1,
+	"revision": 4,
 	"createdBy": {
 		"displayName": "Arno Peters",
-		"id": "6219d445-e4c0-4028-8e01-4c74a7acf182",
-		"uniqueName": "arnopeters@hotmail.com"
+		"id": "6b7b6d39-61fa-4959-bf89-b8d308844343",
+		"uniqueName": "arnop@4dotnet.nl"
 	},
-	"createdOn": "2023-01-18T15:19:25.513Z",
+	"createdOn": "2023-01-12T11:19:25.98Z",
 	"modifiedBy": {
 		"displayName": "Arno Peters",
-		"id": "6219d445-e4c0-4028-8e01-4c74a7acf182",
-		"uniqueName": "arnopeters@hotmail.com"
+		"id": "6b7b6d39-61fa-4959-bf89-b8d308844343",
+		"uniqueName": "arnop@4dotnet.nl"
 	},
-	"modifiedOn": "2023-01-18T15:19:25.513Z",
-	"id": "57024933-88e3-471e-9d70-31ecec151601",
+	"modifiedOn": "2023-04-14T12:39:38.757Z",
+	"id": "e15fdad8-2f06-44ee-8898-96e5e9f6633e",
 	"name": "Azure CLI Deployment",
 	"version": {
 		"major": 1,
@@ -57,7 +57,7 @@
 	},
 	"iconUrl": "https://cdn.vsassets.io/v/M197_20220105.3/_content/icon-meta-task.png",
 	"friendlyName": "Azure CLI Deployment",
-	"description": "2Wrapper around Azure CLI to simplify deploying an ARM or a BICEP template to a resource group. ",
+	"description": "Wrapper around Azure CLI to simplify deploying an ARM or a BICEP template to a resource group. ",
 	"category": "Deploy",
 	"definitionType": "metaTask",
 	"author": "Arno Peters",
@@ -66,12 +66,23 @@
 	"inputs": [
 		{
 			"aliases": [],
+			"options": {},
+			"properties": {},
+			"name": "taskLabel",
+			"label": "Task Label",
+			"defaultValue": "Azure CLI - Deployment to Azure",
+			"type": "string",
+			"helpMarkDown": "Display name for the tasks",
+			"groupName": ""
+		},
+		{
+			"aliases": [],
 			"options": {
-				"Subscription": "Subscription",
-				"ResourceGroup": "Resource group"
+				"subscription": "Subscription",
+				"resourceGroup": "Resource group"
 			},
 			"properties": {
-				"EditableOptions": "False"
+				"editableOptions": "False"
 			},
 			"name": "deploymentLevel",
 			"label": "Deployment level",
@@ -87,7 +98,7 @@
 				"complete": "Complete"
 			},
 			"properties": {
-				"EditableOptions": "False"
+				"editableOptions": "False"
 			},
 			"name": "deploymentMode",
 			"label": "Deployment Mode",
@@ -126,6 +137,7 @@
 			"name": "parameterOverrides",
 			"label": "Parameter overrides",
 			"defaultValue": "",
+			"required": false,
 			"type": "string",
 			"helpMarkDown": "key1=value1 key2=value2",
 			"groupName": ""
@@ -136,7 +148,7 @@
 			"properties": {},
 			"name": "resourceGroupName",
 			"label": "Resource group Name",
-			"defaultValue": "",
+			"defaultValue": "$(resourcegroupName)",
 			"required": true,
 			"type": "string",
 			"helpMarkDown": "Name of the resource group to be used in Azure",
@@ -153,18 +165,18 @@
 			"required": true,
 			"type": "string",
 			"helpMarkDown": "Azure location of the resources",
-			"visibleRule": "deploymentLevel = Subscription",
+			"visibleRule": "deploymentLevel = subscription",
 			"groupName": ""
 		},
 		{
 			"aliases": [],
 			"options": {},
 			"properties": {
-				"EndpointFilterRule": ""
+				"endpointFilterRule": ""
 			},
 			"name": "subscription",
 			"label": "Subscription",
-			"defaultValue": "",
+			"defaultValue": "$(subscription)",
 			"required": true,
 			"type": "connectedService:AzureRM",
 			"helpMarkDown": "Select an Azure Resource Manager service connection for the deployment",
@@ -197,7 +209,7 @@
 	"satisfies": [],
 	"sourceDefinitions": [],
 	"dataSourceBindings": [],
-	"instanceNameFormat": "Task group: Azure CLI Deployment $(deploymentLevel)",
+	"instanceNameFormat": "Task Group: Azure CLI Deployment",
 	"preJobExecution": {},
 	"execution": {},
 	"postJobExecution": {},
