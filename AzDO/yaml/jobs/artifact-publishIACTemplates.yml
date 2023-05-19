@@ -3,7 +3,7 @@ parameters:
   artifactName: 'IACTemplates'
   flattenApplicationFolders: false
   applicationTemplatesFolder: 
-  jsonFilter: '**/*.json'
+  exclusions:  # Exclusion lines should be preceded with !  / Exclusion can be made multiline by writing a pipe ->  exclusions: | \n !**\*.ps1 
 
 jobs:
 - job: PublishApplicationIACTemplates
@@ -17,10 +17,8 @@ jobs:
     inputs:
       sourceFolder: '${{ parameters.applicationTemplatesFolder }}'
       contents: |
-        **/*.ps1
-        **/*.psm1
-        **/*.IAC
-        ${{ parameters.jsonFilter }}
+        **/*
+        ${{ parameters.exclusions }}
         !**/.vscode/**/*.json
       targetFolder: '${{ parameters.publishFolder }}/IAC'
       flattenFolders: ${{ parameters.flattenApplicationFolders }}
