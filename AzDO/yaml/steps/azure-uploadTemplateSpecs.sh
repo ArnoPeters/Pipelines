@@ -86,10 +86,10 @@ function dir_upload_templatespecs () {
           echo "##[group]Publishing [$pathname] as [$namespacedFileName]"
           for version in "${versions[@]}"
           do
-            hasUploadedAnything=true #It's quite ugly to use a global var for this, but it works.
             local cmd="az ts create --yes --name \"$namespacedFileName\" --version \"$version\" --resource-group \"$resourceGroupName\" --location \"$location\" --template-file \"$pathname\""
             echo "##[command]$cmd"
             eval "$cmd"
+            hasUploadedAnything=true #It's quite ugly to use a global var for this, but it works.
           done
           echo "##[endgroup]"
         ;;   
