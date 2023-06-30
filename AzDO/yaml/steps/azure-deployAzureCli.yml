@@ -1,41 +1,61 @@
 parameters:
 - name: 'subscription'
   type: string
+  displayName: 'Name of the target subscription (only used on "subscription" deployment level)'
 - name: 'resourceGroupName'
   type: string
   default: ''
+  displayName: 'Name of the target resource group (only used on "resourceGroup" deployment level)'
+- name: 'managementGroupId'
+  type: string
+  default: ''  
+  displayName: 'Management Group ID. (only used on "managementGroup" deployment level)'
 - name: 'resourceLocation'
   type: string
   default: ''
+  displayName: 'Location for the resources in Azure'
 - name: 'templateFile'
   type: string
+  displayName: 'Bicep or ARM template file'
 - name: 'templateParameterFile'
   type: string
   default: ''
+  displayName: 'ARM (.json) or Bicep (.bicepparam) parameter file'
 - name: 'parameterOverrides'
   type: string
   default: ''
+  displayName: 'Custom parameter overrides'
 - name: 'outputVariableNamePrefix'
   type: string
   default: ''
+  displayName: 'Prefix for the output variables'
 - name: 'deploymentName'
   type: string
   default: ''
+  displayName: 'Name of the deployment'
 - name: 'deploymentMode'
   type: string
-  default: 'incremental'
+  default: 'Incremental'
   values:
-  - 'incremental'      
-  - 'complete'
+  - 'Incremental'      
+  - 'Complete'
+  displayName: 'Deployment Mode (only used on "resourceGroup" deployment level)'
 - name: 'deploymentLevel'
   type: string
   default: 'resourceGroup'
   values:
+  - 'tenant'
+  - 'managementGroup'
   - 'subscription'
   - 'resourceGroup'
+  displayName: 'Target level of the deployment'
+- name: 'showExpectedChanges'
+  type: boolean
+  default: false
+  displayName: 'Show expected changes'
 steps:
 
-# Based on the script found on https://blog.johnnyreilly.com/2021/03/20/bicep-meet-azure-pipelines/
+# Originally based on the script found on https://blog.johnnyreilly.com/2021/03/20/bicep-meet-azure-pipelines/
 # Enhanded around standard Azure CLI script https://learn.microsoft.com/en-us/azure/azure-resource-manager/bicep/add-template-to-azure-pipelines?tabs=CLI
 
 - task: AzureCLI@2
@@ -47,15 +67,24 @@ steps:
     outputVariableNamePrefix: '${{ parameters.outputVariableNamePrefix }}'
     parameterOverrides: '${{ parameters.parameterOverrides }}'
     resourceLocation: '${{ parameters.resourceLocation }}'
-    resourceGroupName: '${{ parameters.resourcegroupName }}'
+    resourceGroupName: '${{ parameters.resourceGroupName }}'
     templateFile: '${{ parameters.templateFile }}'
     templateParameterFile: '${{ parameters.templateParameterFile }}'
+    showExpectedChanges: '${{ parameters.showExpectedChanges }}'
+    managementGroupId: '${{ parameters.managementGroupId }}'
   inputs:
     failOnStandardError: true
     azureSubscription: '${{ parameters.subscription }}'
     scriptType: bash
     scriptLocation: inlineScript
     inlineScript: |    
+      # Ensure Azure CLI is up to date. May generate warning, can be ignored
+      echo '##[section]Ensure Azure CLI is up to date'
+      exec 3>&2
+      exec 2> /dev/null
+      az bicep upgrade
+      exec 2>&3
+
       # Path sanitizing for Linux
       templateFile="${templateFile//\\//}"
       templateParameterFile="${templateParameterFile//\\//}"
@@ -69,32 +98,32 @@ steps:
         params+=$" --parameters $parameterOverrides"
       fi
       if [ "$templateParameterFile" != "" ]; then 
-        params+=" --parameters \"@$templateParameterFile\""
+        params+=" --parameters \"$templateParameterFile\""
       fi
-
       {
-        echo '##[section]Deploy template'
-        if [ $deploymentLevel == 'subscription' ]; then
-        {
-          cmd="az deployment sub create --name \"$deploymentName\" --location \"$resourceLocation\" --template-file \"$templateFile\" $params"
-          echo "##[command]$cmd"
-          eval "$cmd"
-        } && {
-          cmd="az deployment sub show --name \"$deploymentName\" --query properties.outputs"
-          echo $cmd
-          deploymentoutputs=$(eval $cmd)
-        }
-        else
-        {
-          cmd="az deployment group create --name \"$deploymentName\" --mode \"$deploymentMode\" --resource-group \"$resourceGroupName\" --template-file \"$templateFile\" $params"
-          echo "##[command]$cmd"
-          eval "$cmd"
-        } && {
-          cmd="az deployment group show --resource-group \"$resourceGroupName\" --name \"$deploymentName\" --query properties.outputs"
-          echo "##[command]$cmd"
-          deploymentoutputs=$(eval "$cmd")
-        }
-      fi
+        if [ $deploymentLevel == 'tenant' ]; then
+          cmd="az deployment tenant create --location \"$resourceLocation\""
+          outputsCmd="az deployment tenant show"
+        elif [ $deploymentLevel == 'managementGroup' ]; then
+          cmd="az deployment mg create --management-group-id \"$managementGroupId\" --location \"$resourceLocation\""
+          outputsCmd="az deployment mg show --management-group-id \"$managementGroupId\""
+        elif [ $deploymentLevel == 'subscription' ]; then
+          cmd="az deployment sub create --location \"$resourceLocation\""
+          outputsCmd="az deployment sub show"
+        elif [ $deploymentLevel == 'resourceGroup' ]; then 
+          cmd="az deployment group create --mode \"$deploymentMode\" --resource-group \"$resourceGroupName\""
+          outputsCmd="az deployment group show --resource-group \"$resourceGroupName\""
+        fi
+        cmd="$cmd --name \"$deploymentName\" --template-file \"$templateFile\" $params"
+        outputsCmd="$outputsCmd --name \"$deploymentName\" --query properties.outputs"
+        echo "##[command]$cmd"
+        if [[ "${showExpectedChanges,,}" == "true" ]]; then 
+          echo '##[section]Template: expected changes'
+          eval "$cmd --what-if -w"
+        fi
+        echo '##[section]Template: deployment'
+        eval "$cmd"
+        deploymentoutputs=$(eval "$outputsCmd")
       } && {
         echo '##[section]Convert outputs to variables'
         echo $deploymentoutputs | jq -c '. | to_entries[] | [.key, .value.value, .value.type]' |

@@ -1,19 +1,30 @@
 #!/bin/bash
 
-# Uncomment to get the script for local testing or for inline use in a Task Group 
-# run using WSL
+# Copy the script below the --- dotted line
+# Conversion to inline for yaml: 
+# replace \ with \\
+# replace " with \"
+# replace a newline char with \n
+# -------------------------------------------------------
 
-# deploymentName='$(deploymentName)'
-# deploymentMode='$(deploymentMode)'
-# deploymentLevel='$(deploymentLevel)'
-# outputVariableNamePrefix='$(outputVariableNamePrefix)'
-# parameterOverrides=$'$(parameterOverrides)'
-# resourceLocation='$(resourceLocation)'
-# resourceGroupName='$(resourcegroupName)'
-# templateFile='$(templateFile)'
-# templateParameterFile='$(templateParameterFile)'
+deploymentName='$(deploymentName)'
+deploymentMode='$(deploymentMode)'
+deploymentLevel='$(deploymentLevel)'
+outputVariableNamePrefix='$(outputVariableNamePrefix)'
+parameterOverrides=$'$(parameterOverrides)'
+resourceLocation='$(resourceLocation)'
+resourceGroupName='$(resourceGroupName)'
+templateFile='$(templateFile)'
+templateParameterFile='$(templateParameterFile)'
+showExpectedChanges=$(showExpectedChanges)
+managementGroupId='$(managementGroupId)'
 
-# --- Script start --- 
+# Ensure Azure CLI is up to date. May generate warning, can be ignored
+echo '##[section]Ensure Azure CLI is up to date'
+exec 3>&2
+exec 2> /dev/null
+az bicep upgrade
+exec 2>&3
 
 # Path sanitizing for Linux
 templateFile="${templateFile//\\//}"
@@ -28,32 +39,32 @@ if [ "$parameterOverrides" != "" ]; then
   params+=$" --parameters $parameterOverrides"
 fi
 if [ "$templateParameterFile" != "" ]; then 
-  params+=" --parameters \"@$templateParameterFile\""
+  params+=" --parameters \"$templateParameterFile\""
 fi
-
 {
-  echo '##[section]Deploy template'
-  if [ $deploymentLevel == 'subscription' ]; then
-  {
-    cmd="az deployment sub create --name \"$deploymentName\" --location \"$resourceLocation\" --template-file \"$templateFile\" $params"
-    echo "##[command]$cmd"
-    eval "$cmd"
-  } && {
-    cmd="az deployment sub show --name \"$deploymentName\" --query properties.outputs"
-    echo $cmd
-    deploymentoutputs=$(eval $cmd)
-  }
-  else
-  {
-    cmd="az deployment group create --name \"$deploymentName\" --mode \"$deploymentMode\" --resource-group \"$resourceGroupName\" --template-file \"$templateFile\" $params"
-    echo "##[command]$cmd"
-    eval "$cmd"
-  } && {
-    cmd="az deployment group show --resource-group \"$resourceGroupName\" --name \"$deploymentName\" --query properties.outputs"
-    echo "##[command]$cmd"
-    deploymentoutputs=$(eval "$cmd")
-  }
-fi
+  if [ $deploymentLevel == 'tenant' ]; then
+    cmd="az deployment tenant create --location \"$resourceLocation\""
+    outputsCmd="az deployment tenant show"
+  elif [ $deploymentLevel == 'managementGroup' ]; then
+    cmd="az deployment mg create --management-group-id \"$managementGroupId\" --location \"$resourceLocation\""
+    outputsCmd="az deployment mg show --management-group-id \"$managementGroupId\""
+  elif [ $deploymentLevel == 'subscription' ]; then
+    cmd="az deployment sub create --location \"$resourceLocation\""
+    outputsCmd="az deployment sub show"
+  elif [ $deploymentLevel == 'resourceGroup' ]; then 
+    cmd="az deployment group create --mode \"$deploymentMode\" --resource-group \"$resourceGroupName\""
+    outputsCmd="az deployment group show --resource-group \"$resourceGroupName\""
+  fi
+  cmd="$cmd --name \"$deploymentName\" --template-file \"$templateFile\" $params"
+  outputsCmd="$outputsCmd --name \"$deploymentName\" --query properties.outputs"
+  echo "##[command]$cmd"
+  if [[ "${showExpectedChanges,,}" == "true" ]]; then 
+    echo '##[section]Template: expected changes'
+    eval "$cmd --what-if -w"
+  fi
+  echo '##[section]Template: deployment'
+  eval "$cmd"
+  deploymentoutputs=$(eval "$outputsCmd")
 } && {
   echo '##[section]Convert outputs to variables'
   echo $deploymentoutputs | jq -c '. | to_entries[] | [.key, .value.value, .value.type]' |
@@ -73,4 +84,4 @@ fi
       fi
       
     done    
-}
+} 
