@@ -24,11 +24,12 @@ resources:
     - repository: self
       clean: true
 
+pool: 
+  vmImage: 'ubuntu-latest'
+
 stages:
 - stage: Build
   displayName: Buildstage
-  pool: #default 
-    vmImage: 'ubuntu-latest'
   jobs:
   - template: /AzDO/yaml/jobs/AzDO_uploadTaskgroups.yml
     parameters: 
