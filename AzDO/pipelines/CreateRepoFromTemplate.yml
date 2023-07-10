@@ -1,8 +1,10 @@
-# This pipeline creates a new repo in an Azure Devops Team Project Collection, based on an existing repo in the same Azure Devops Team Project collection. 
+# This pipeline creates a new repo in an Azure Devops Team Project Collection, based on an existing repo in the same Team Project Collection. 
 # It emulates the same functionality as Github's template repositories.
+# Note: it only works within Azure Devops. Creating a new repo from an existing Github repo is currently not supported. 
 
 # Installation
-# Add the pipeline to Azure Devops.  
+# - Add the pipeline to Azure Devops.  
+# - Line 26: Replace "!BaseRepo" with the name of the default template repo in your Team Project Collection.
 
 # Usage
 # Run the pipeline from Azure Devops. It has some required parameters to specify the source and target repo. After running, a new repo will have been added.  
