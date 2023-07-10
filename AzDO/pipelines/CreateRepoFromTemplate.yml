@@ -1,0 +1,76 @@
+# This pipeline creates a new repo in an Azure Devops Team Project Collection, based on an existing repo in the same Azure Devops Team Project collection. 
+# It emulates the same functionality as Github's template repositories.
+
+# Installation
+# Add the pipeline to Azure Devops.  
+
+# Usage
+# Run the pipeline from Azure Devops. It has some required parameters to specify the source and target repo. After running, a new repo will have been added.  
+#
+# The new repo will be identical to the existing repo, but: 
+# - Only one branch will be cloned
+# - All on the source repo commits will be reset into 1 single initial commit on the new repo
+
+# Credits
+# This pipeline is inspired by (and partially based on) a blogpost from Stephen Allwright. 
+# https://stephenallwright.com/project-template-repository-azure-devops/
+
+parameters:
+- name: 'newRepoName'
+  type: string
+  displayName: 'Name of the new repository'
+- name: 'templateRepoName'
+  type: string
+  displayName: 'Name of the template repo'
+  default: "!BaseRepo"
+- name: 'templateRepoBranch'
+  displayName: 'Source branch from the template repo'
+  type: string
+  default: 'main'
+
+trigger:
+  - none
+
+pool:
+  vmImage: "ubuntu-latest"
+
+jobs:
+- job: 
+  displayName: "Create new repo '${{ parameters.newRepoName }}' from template repo '${{ parameters.templateRepoName }}'"
+  steps:
+  - checkout: none
+  - bash: |
+      projectName=$(jq -rn --arg x '$(System.TeamProject)' '$x|@uri')
+      sourceRepoName=$(jq -rn --arg x '${{ parameters.templateRepoName }}' '$x|@uri')
+      newRepoName=$(jq -rn --arg x '${{ parameters.newRepoName }}' '$x|@uri')
+      repoPrefix="$(System.CollectionUri)${projectName}/_git/"
+      
+      # Clone the template repo to the agent. Using the extraheader solves the problem of having to alter the url. 
+      git clone "${repoPrefix}${sourceRepoName}" \
+        -b ${{ parameters.templateRepoBranch }} \
+        -c http.extraheader="Authorization: Bearer $(System.AccessToken)" \
+        --single-branch \
+        --no-tags \
+          $(Build.SourcesDirectory)
+      
+      # Mixed reset to first commit, then push with amend.
+      # NOTE: .git folder is NOT removed! This is to keep modules and other settings working properly.
+      initialCommitSha=$(git rev-list --max-parents=0 --abbrev-commit HEAD)
+      git reset --mixed $initialCommitSha
+      
+      # Recommit everything in the repo, replacing the first commit with whatever the template repo provides. 
+      # NOTE: requires one time use of name / email. Does not need to go in agent global config. 
+      git add --all 
+      git -c user.name="$(Build.RequestedFor)" -c user.email="$(Build.RequestedForEmail)"  commit --amend  -m "Copied from template repo '${{ parameters.templateRepoName }}'"
+
+      # Login to DevOps using your system access token
+      # Create new empty repo
+      echo $(System.AccessToken) | az devops login
+      az repos create --name "${{ parameters.newRepoName }}" --organization "$(System.CollectionUri)" --project "$(System.TeamProject)"
+
+      # Add the new remote. Original remote is kept as 'template'
+      # And push everything into the new repo.
+      git remote rename origin template
+      git remote add origin "${repoPrefix}${newRepoName}"
+      git push -u origin --all
+    displayName: 'Replicate new repo from template'
