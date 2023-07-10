@@ -17,6 +17,10 @@
 # This pipeline is inspired by (and partially based on) a blogpost from Stephen Allwright. 
 # https://stephenallwright.com/project-template-repository-azure-devops/
 
+name: "Create new repo '${{ parameters.newRepoName }}'"
+# Commit message on source repo has nothing to do with the run. Do not display.
+appendCommitMessageToRunName: false
+
 parameters:
 - name: 'newRepoName'
   type: string
