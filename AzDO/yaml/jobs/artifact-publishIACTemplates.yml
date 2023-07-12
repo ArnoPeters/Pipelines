@@ -1,13 +1,16 @@
 parameters:
   publishFolder: '$(build.artifactstagingdirectory)'
+  bicepConfigFolder: '' 
   artifactName: 'IACTemplates'
   flattenApplicationFolders: false
   applicationTemplatesFolder: 
-  exclusions:  # Exclusion lines should be preceded with !  / Exclusion can be made multiline by writing a pipe ->  exclusions: | \n !**\*.ps1 
+  exclusions:
 
 jobs:
 - job: PublishApplicationIACTemplates
   displayName: Publish Application IAC templates to artifacts
+  pool:
+    vmImage: 'ubuntu-latest'
   steps:
   - checkout: self
     clean: true
@@ -22,6 +25,15 @@ jobs:
         !**/.vscode/**/*.json
       targetFolder: '${{ parameters.publishFolder }}/IAC'
       flattenFolders: ${{ parameters.flattenApplicationFolders }}
+
+  - ${{ if ne(parameters.bicepConfigFolder, '') }}:
+    - task: CopyFiles@2
+      displayName: Copy bicepconfig.json from '${{ parameters.bicepConfigFolder }}'
+      inputs:
+        sourceFolder: '${{ parameters.bicepConfigFolder }}'
+        contents: |
+          bicepconfig.json
+        targetFolder: '${{ parameters.publishFolder }}/IAC'
 
   - task: PublishBuildArtifacts@1
     displayName: Publish '${{ parameters.publishFolder }}/IAC' to pipeline artifacts
