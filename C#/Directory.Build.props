@@ -1,0 +1,62 @@
+<Project>
+
+	<PropertyGroup Condition=" '$(TF_BUILD)' == 'true' or '$(GITHUB_ACTIONS)' == 'true' ">
+		<!-- from https://devblogs.microsoft.com/dotnet/producing-packages-with-source-link/ -->
+		<ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+		<FileVersion>$(GITVERSION_ASSEMBLYSEMFILEVER)</FileVersion>
+		<AssemblyVersion>$(GITVERSION_MAJORMINORPATCH)</AssemblyVersion>
+		<Version>$(VERSIONING_PACKAGEVERSION)</Version>
+		<Authors>$(authors)</Authors>
+		<Company>$(company)</Company>
+		<Product>$(product)</Product>
+		<Copyright>$(copyright)</Copyright>
+	</PropertyGroup>
+
+	<!-- 
+		Settings below are only applied when "Generate package on build" is selected in the project 
+    They add debug symbols to the build using Sourcelink.
+		By making this conditional, the .props file can be applied to any c# solution as the versioning above is universal.
+	-->
+
+	<PropertyGroup Condition=" '$(GeneratePackageOnBuild)' == 'true' ">
+		<IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+		<DebugType>portable</DebugType>
+		<DebugSymbols>true</DebugSymbols>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<!-- <PackageLicenseExpression>MIT-Modern-Variant</PackageLicenseExpression> -->
+		<PackageLicenseFile Condition="Exists('../../LICENSE.md')">licenses/LICENSE.md</PackageLicenseFile>		<!-- this is going to be obsolete -->
+		<PackageIcon Condition="Exists('../../icon.png')">images/icon.png</PackageIcon>
+		<PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
+		<!-- Do not embed source files that are not tracked by the source control manager in the PDB -->
+		<EmbedUntrackedSources>false</EmbedUntrackedSources>
+	</PropertyGroup>
+
+	<ItemGroup Condition=" '$(GeneratePackageOnBuild)' == 'true' and '$(BUILD_REPOSITORY_PROVIDER)' == 'GitHub' ">
+		<PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup Condition=" '$(GeneratePackageOnBuild)' == 'true' and '$(BUILD_REPOSITORY_PROVIDER)' == 'TfsGit' ">
+		<PackageReference Include="Microsoft.SourceLink.AzureRepos.Git" Version="1.1.1">
+			<PrivateAssets>all</PrivateAssets>
+			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+		</PackageReference>
+	</ItemGroup>
+
+	<ItemGroup Condition=" '$(GeneratePackageOnBuild)' == 'true' ">
+		<None Condition="Exists('../../LICENSE.md')" Include="../../LICENSE.md">
+			<Pack>True</Pack>
+			<PackagePath>licenses/LICENSE.md</PackagePath>
+		</None>
+		<None Condition="Exists('../../icon.png')" Include="../../icon.png">
+			<Pack>True</Pack>
+			<PackagePath>images/icon.png</PackagePath>
+		</None>
+	</ItemGroup>
+
+
+
+
+</Project>

@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <!-- for environment-specific run settings, copy and name this file, and then refer to to the copy in a test task. -->
+  
+  <!-- Parameters used by tests at runtime -->  
+  <TestRunParameters>  
+    <Parameter name="key" value="value" />  
+  </TestRunParameters>  
+  <!-- more info at https://docs.microsoft.com/en-us/visualstudio/test/configure-unit-tests-by-using-a-dot-runsettings-file?view=vs-2019 -->
+</RunSettings>
