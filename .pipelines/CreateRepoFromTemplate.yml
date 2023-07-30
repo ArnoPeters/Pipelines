@@ -78,5 +78,5 @@ jobs:
       # And push everything into the new repo.
       git remote rename origin template
       git remote add origin "${repoPrefix}${newRepoName}"
-      git push -u origin --all
+      git -c http.extraheader="Authorization: Bearer $(System.AccessToken)" push -u origin --all
     displayName: 'Replicate new repo from template'
