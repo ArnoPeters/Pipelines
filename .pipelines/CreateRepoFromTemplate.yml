@@ -28,7 +28,7 @@ parameters:
 - name: 'templateRepo'
   type: string
   displayName: 'Template repository: GIT url, OR repository name within this Team Project Collection'
-  default: "https://github.com/ArnoPeters/Pipelines.git" #"!BaseRepo"
+  default: "https://github.com/ArnoPeters/BaseRepo-AzDO-CSharp"
 - name: 'templateRepoBranch'
   displayName: 'Source branch from the template repository'
   type: string
