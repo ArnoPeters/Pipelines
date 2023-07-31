@@ -12,10 +12,12 @@
 
 # Installation
 # - Add this pipeline to Azure Devops.  
-# - Line 38: Replace "!BaseRepo" with the name of the default template repo in your Team Project Collection, or a valid URL to a git repo which can be accessed. 
+# - Line 40: Replace "!BaseRepo" with the name of the default template repo in your Team Project Collection, or a valid URL to a git repo which can be accessed. 
 
 # Usage
 # Run the pipeline from Azure Devops. It has some required parameters to specify the source and target repo, and what branch to use. After running, a new repo will have been added to Azure Devops.
+# - For a template repository within the same Azure Devops Team Project Collection, it is not necessary to enter the full url to template repo: using only the name will suffice. 
+# - For a template repository in Github, use the full url (http://github.com/account/repo.git) instead.
 #
 # The new repo will be identical to the existing repo, but: 
 # - Only one branch will be cloned
