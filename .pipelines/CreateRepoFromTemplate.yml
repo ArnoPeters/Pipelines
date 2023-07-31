@@ -1,8 +1,6 @@
 # This pipeline creates a new repo in an Azure Devops Team Project Collection, based on an existing repo. 
 # It emulates the same functionality as Github's template repositories.
 
-
-
 # Prerequisites: 
 # - Ensure your Azure Devops organisation is switched to use new url scheme (dev.azure.com/your-organisation)
 #   - When using the classic url scheme (your-organisation.visualstudio.com), it is actually possible to access your organisation using BOTH. 
@@ -14,7 +12,7 @@
 
 # Installation
 # - Add this pipeline to Azure Devops.  
-# - Line 41: Replace "!BaseRepo" with the name of the default template repo in your Team Project Collection, or a valid URL to a git repo which can be accessed. 
+# - Line 38: Replace "!BaseRepo" with the name of the default template repo in your Team Project Collection, or a valid URL to a git repo which can be accessed. 
 
 # Usage
 # Run the pipeline from Azure Devops. It has some required parameters to specify the source and target repo, and what branch to use. After running, a new repo will have been added to Azure Devops.
