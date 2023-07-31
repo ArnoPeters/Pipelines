@@ -7,8 +7,8 @@
 #     This confuses the system variables, which will only return the OLD urls, and prevents the script from working if you try to access your organisation using the NEW url scheme.
 #   - By setting the switch to only the new url scheme, it will rewrite your url if you access your organisation on the old scheme. This ensures the script always uses a valid url. 
 #   - More details: https://learn.microsoft.com/en-us/azure/devops/release-notes/2018/sep-10-azure-devops-launch#administration
-# - When using a Github repo as template source, create a service connection between the Azure Devops Team Project Collection, and the Github account hosting the template. 
-#  - This allows devops agent to simply access the repo in Github without further authentication issues.
+# - When using a Github repository as template source, create a service connection between the Azure Devops Team Project Collection, and the Github account hosting the template. 
+#  - This allows the Azure Devops build agent to simply access the repository in Github without further authentication issues.
 
 # Installation
 # - Add this pipeline to Azure Devops.  
