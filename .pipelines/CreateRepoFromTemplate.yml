@@ -1,13 +1,23 @@
-# This pipeline creates a new repo in an Azure Devops Team Project Collection, based on an existing repo in the same Team Project Collection. 
+# This pipeline creates a new repo in an Azure Devops Team Project Collection, based on an existing repo. 
 # It emulates the same functionality as Github's template repositories.
-# Note: it only works within Azure Devops. Creating a new repo from an existing Github repo is currently not supported. 
+
+
+
+# Prerequisites: 
+# - Ensure your Azure Devops organisation is switched to use new url scheme (dev.azure.com/your-organisation)
+#   - When using the classic url scheme (your-organisation.visualstudio.com), it is actually possible to access your organisation using BOTH. 
+#     This confuses the system variables, which will only return the OLD urls, and prevents the script from working if you try to access your organisation using the NEW url scheme.
+#   - By setting the switch to only the new url scheme, it will rewrite your url if you access your organisation on the old scheme. This ensures the script always uses a valid url. 
+#   - More details: https://learn.microsoft.com/en-us/azure/devops/release-notes/2018/sep-10-azure-devops-launch#administration
+# - When using a Github repo as template source, create a service connection between the Azure Devops Team Project Collection, and the Github account hosting the template. 
+#  - This allows devops agent to simply access the repo in Github without further authentication issues.
 
 # Installation
-# - Add the pipeline to Azure Devops.  
-# - Line 31: Replace "!BaseRepo" with the name of the default template repo in your Team Project Collection.
+# - Add this pipeline to Azure Devops.  
+# - Line 41: Replace "!BaseRepo" with the name of the default template repo in your Team Project Collection, or a valid URL to a git repo which can be accessed. 
 
 # Usage
-# Run the pipeline from Azure Devops. It has some required parameters to specify the source and target repo. After running, a new repo will have been added.  
+# Run the pipeline from Azure Devops. It has some required parameters to specify the source and target repo, and what branch to use. After running, a new repo will have been added to Azure Devops.
 #
 # The new repo will be identical to the existing repo, but: 
 # - Only one branch will be cloned
@@ -18,8 +28,7 @@
 # https://stephenallwright.com/project-template-repository-azure-devops/
 
 name: "Create new repo '${{ parameters.newRepoName }}'"
-# Commit message on source repo has nothing to do with the run. Do not display.
-appendCommitMessageToRunName: false
+appendCommitMessageToRunName: false # Commit message on source repo has nothing to do with what this pipeline does when run. Do not display.
 
 parameters:
 - name: 'newRepoName'
@@ -77,7 +86,6 @@ jobs:
         echo "##[error]Repository '${newRepoName}' already exists. Aborting."  
       else
         echo "##[debug]Setting extra header for '${newRepoPrefix}'."
-        #assumption: org has been switched to use new dev.azure.com urls - if accessed by new url but not switched, this global config will not add the correct prefixes. 
         git config --global --add "http.$newRepoPrefix.extraHeader" "Authorization: Bearer $(System.AccessToken)"
 
         # Clone the template repo to the agent. Using the extraheader solves the problem of having to alter the url. 
