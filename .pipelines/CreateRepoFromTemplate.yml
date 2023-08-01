@@ -2,6 +2,8 @@
 # It emulates the same functionality as Github's template repositories.
 
 # Prerequisites: 
+# - The account for the project's Build Service (not the Project Collection Build Service) needs permissions: 
+#   Project Settings -> Repos -> Repositories -> Security -> select the project's Build Service -> set "Create Repository" to "Allow"
 # - Ensure your Azure Devops organisation is switched to use new url scheme (dev.azure.com/your-organisation)
 #   - When using the classic url scheme (your-organisation.visualstudio.com), it is actually possible to access your organisation using BOTH. 
 #     This confuses the system variables, which will only return the OLD urls, and prevents the script from working if you try to access your organisation using the NEW url scheme.
@@ -12,7 +14,7 @@
 
 # Installation
 # - Add this pipeline to Azure Devops.  
-# - Line 40: Replace "!BaseRepo" with the name of the default template repo in your Team Project Collection, or a valid URL to a git repo which can be accessed. 
+# - Line 42: Replace the 'default' value with the name of the default template repo in your Team Project Collection, or a valid URL to a git repo which can be accessed. 
 
 # Usage
 # Run the pipeline from Azure Devops. It has some required parameters to specify the source and target repo, and what branch to use. After running, a new repo will have been added to Azure Devops.
