@@ -6,7 +6,7 @@ mode: ContinuousDelivery #https://gitversion.readthedocs.io/en/latest/input/docs
 increment: Inherit
 
 tag-prefix: '[vV]'
-#major-version-bump-message: '\+semver:\s?(breaking|major)' --todo: blog about this
+#major-version-bump-message: '\+semver:\s?(breaking|major)'
 #minor-version-bump-message: '\+semver:\s?(feature|minor)'
 #patch-version-bump-message: '\+semver:\s?(fix|patch)'
 #no-bump-message: '\+semver:\s?(none|skip)'
