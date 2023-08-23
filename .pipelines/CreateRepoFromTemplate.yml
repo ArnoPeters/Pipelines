@@ -2,8 +2,8 @@
 # It emulates the same functionality as Github's template repositories.
 
 # Prerequisites: 
-# - The account for the project's Build Service (not the Project Collection Build Service) needs permissions: 
-#   Project Settings -> Repos -> Repositories -> Security -> select the project's Build Service -> set "Create Repository" to "Allow"
+# - The account for the Build Service needs permissions: 
+#   Project Settings -> Repos -> Repositories -> Security -> select the Build Service -> set "Create Repository" to "Allow". Depending on how your pipeline is configured, you may need to set this for either the Project or Project Collection Build service. 
 # - Ensure your Azure Devops organisation is switched to use new url scheme (dev.azure.com/your-organisation)
 #   - When using the classic url scheme (your-organisation.visualstudio.com), it is actually possible to access your organisation using BOTH. 
 #     This confuses the system variables, which will only return the OLD urls, and prevents the script from working if you try to access your organisation using the NEW url scheme.
