@@ -36,6 +36,7 @@ jobs:
     parameters:
       gitVersionConfigFilePath: ${{ parameters.gitVersionConfigFilePath }}
       rootBranchName: ${{ parameters.rootBranchName }}
+      useBuildNumberForPreReleaseTag: false
   - template: ../steps/azure-uploadTemplateSpecs.yml
     parameters:
       templateFolder: '${{ parameters.templateFolder }}'
