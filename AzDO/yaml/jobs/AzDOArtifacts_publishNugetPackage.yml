@@ -31,7 +31,7 @@ parameters:
   default: 'refs/heads/main'
 - name: gitVersionConfigFilePath
   type: string  
-  default: '.pipelines/GitVersion.yml'
+  default: '.pipelines/build/GitVersion.yml'
 - name: publishSymbols
   type: boolean
   default: true

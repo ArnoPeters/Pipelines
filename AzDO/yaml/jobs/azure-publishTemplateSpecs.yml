@@ -15,7 +15,7 @@ parameters:
   default: true
 - name: 'gitVersionConfigFilePath'
   type: string
-  default: '.pipelines/GitVersion.yml'
+  default: '.pipelines/build/GitVersion.yml'
 - name: rootBranchName
   type: string
   default: 'refs/heads/main'
@@ -35,6 +35,7 @@ jobs:
     parameters:
       gitVersionConfigFilePath: ${{ parameters.gitVersionConfigFilePath }}
       rootBranchName: ${{ parameters.rootBranchName }}
+      useBuildNumberForPreReleaseTag: false
   - template: ../steps/azure-uploadTemplateSpecs.yml
     parameters:
       templateFolder: '${{ parameters.templateFolder }}'

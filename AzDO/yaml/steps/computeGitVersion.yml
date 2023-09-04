@@ -12,7 +12,11 @@ parameters:
   displayName: 'Name of the root branch of the repository triggering the build.'
   type: string
   default: 'refs/heads/main'
-  
+- name: 'useBuildNumberForPreReleaseTag'
+  displayName: 'Set to true if the VERSIONING_PACKAGEVERSION should be suffixed with the buildnumber.'
+  type: boolean
+  default: true
+
 steps:     
   - powershell: |
       # The buildnumber is used by Gitversion to get the initial yyyy.mm.dd.rev, but is then automatically overwritten. 
@@ -30,13 +34,13 @@ steps:
         {
           # Manual Branch Build
           $sourceBranch = ('$(system.pullrequest.sourcebranch)' -split '/')[-1]
-          Write-Host "##vso[task.setvariable variable=VERSIONING_PRERELEASELABELWITHDASH]-$sourceBranch"  
-          write-host "VERSIONING_PRERELEASELABELWITHDASH='-$sourceBranch'"
         } else {
           # PR Branch build
-          Write-Host "##vso[task.setvariable variable=VERSIONING_PRERELEASELABELWITHDASH]-$(Build.SourceBranchName)"  
-          write-host "VERSIONING_PRERELEASELABELWITHDASH='-$(Build.SourceBranchName)'"
+          $sourceBranch = '$(Build.SourceBranchName)'
         }
+        $sanitizedSourceBranch = $sourceBranch.replace('_', '-') # gitversion replaces underscores with dashes. This variable must match that practice to be useful in scripts
+        Write-Host "##vso[task.setvariable variable=VERSIONING_PRERELEASELABELWITHDASH]-$sanitizedSourceBranch"  
+        write-host "VERSIONING_PRERELEASELABELWITHDASH='-$sanitizedSourceBranch'"
       } else {
         # Root Build
         Write-Host "##vso[task.setvariable variable=VERSIONING_PRERELEASELABELWITHDASH]"
@@ -58,7 +62,7 @@ steps:
       configFilePath: ${{ parameters.gitVersionConfigFilePath }}
   
   - powershell: |
-      if('$(VERSIONING_PRERELEASELABELWITHDASH)' -ne '')  
+      if(('$(VERSIONING_PRERELEASELABELWITHDASH)' -ne '') -and ('${{ parameters.useBuildNumberForPreReleaseTag }}'.ToLower() -eq 'true'))  
       {
         $packageVersion= "$(Gitversion.InformationalVersion)-$(Gitversion.AssemblySemFileVer)"
       } else {
