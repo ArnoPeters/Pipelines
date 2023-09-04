@@ -26,6 +26,7 @@ jobs:
   variables:
     #preventing git shallow clone to fix gitversion error  https://github.com/GitTools/GitVersion/issues/3091
     Agent.Source.Git.ShallowFetchDepth: 0
+    isRelease: ${{ eq(variables['Build.SourceBranch'], parameters.rootBranchName) }}
   steps: 
   - checkout: self
     displayName: "Checkout repository including submodules"
@@ -35,7 +36,6 @@ jobs:
     parameters:
       gitVersionConfigFilePath: ${{ parameters.gitVersionConfigFilePath }}
       rootBranchName: ${{ parameters.rootBranchName }}
-      useBuildNumberForPreReleaseTag: false
   - template: ../steps/azure-uploadTemplateSpecs.yml
     parameters:
       templateFolder: '${{ parameters.templateFolder }}'
@@ -48,6 +48,7 @@ jobs:
       preReleaseLabel: '$(VERSIONING_PRERELEASELABELWITHDASH)'
       publishWildcardVersions: ${{ parameters.publishWildcardVersions  }}
       publishLatest: ${{ parameters.publishLatest  }}
-  - template: ../steps/tagCommit.yml
-    parameters:
-      value: 'v$(Gitversion.MajorMinorPatch)'
+  - ${{ if eq(variables.isRelease, 'True') }}:
+    - template: ../steps/tagCommit.yml
+      parameters:
+        value: 'v$(Gitversion.MajorMinorPatch)'
