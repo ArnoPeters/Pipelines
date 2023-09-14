@@ -11,13 +11,14 @@ deploymentName='$(deploymentName)'
 deploymentMode='$(deploymentMode)'
 deploymentLevel='$(deploymentLevel)'
 outputVariableNamePrefix='$(outputVariableNamePrefix)'
-parameterOverrides=$'$(parameterOverrides)'
-resourceLocation='$(resourceLocation)'
+parameterOverrides='$(parameterOverrides)'
+azureDeploymentDataLocation='$(azureDeploymentDataLocation)'
 resourceGroupName='$(resourceGroupName)'
 templateFile='$(templateFile)'
 templateParameterFile='$(templateParameterFile)'
-showExpectedChanges=$(showExpectedChanges)
+showExpectedChanges='$(showExpectedChanges)'
 managementGroupId='$(managementGroupId)'
+subscription='$(subscription)'
 
 # Ensure Azure CLI is up to date. May generate warning, can be ignored
 echo '##[section]Ensure Azure CLI is up to date'
@@ -43,19 +44,19 @@ if [ "$templateParameterFile" != "" ]; then
 fi
 {
   if [ $deploymentLevel == 'tenant' ]; then
-    cmd="az deployment tenant create --location \"$resourceLocation\""
+    cmd="az deployment tenant create --location \"$azureDeploymentDataLocation\""
     outputsCmd="az deployment tenant show"
   elif [ $deploymentLevel == 'managementGroup' ]; then
-    cmd="az deployment mg create --management-group-id \"$managementGroupId\" --location \"$resourceLocation\""
+    cmd="az deployment mg create --management-group-id \"$managementGroupId\" --location \"$azureDeploymentDataLocation\""
     outputsCmd="az deployment mg show --management-group-id \"$managementGroupId\""
   elif [ $deploymentLevel == 'subscription' ]; then
-    cmd="az deployment sub create --location \"$resourceLocation\""
+    cmd="az deployment sub create --subscription \"$subscription\" --location \"$azureDeploymentDataLocation\""
     outputsCmd="az deployment sub show"
   elif [ $deploymentLevel == 'resourceGroup' ]; then 
-    cmd="az deployment group create --mode \"$deploymentMode\" --resource-group \"$resourceGroupName\""
+    cmd="az deployment group create --subscription \"$subscription\" --resource-group \"$resourceGroupName\" --mode \"$deploymentMode\""
     outputsCmd="az deployment group show --resource-group \"$resourceGroupName\""
   fi
-  cmd="$cmd --name \"$deploymentName\" --template-file \"$templateFile\" $params"
+  cmd="$cmd --name \"$deploymentName\" --template-file \"$templateFile\"$params"
   outputsCmd="$outputsCmd --name \"$deploymentName\" --query properties.outputs"
   echo "##[command]$cmd"
   if [[ "${showExpectedChanges,,}" == "true" ]]; then 

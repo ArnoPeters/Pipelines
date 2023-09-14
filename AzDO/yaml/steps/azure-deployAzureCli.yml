@@ -1,4 +1,7 @@
 parameters:
+- name: 'azureServiceConnectionName'
+  type: string
+  displayName: 'Name of the service connection to use for deployment'
 - name: 'subscription'
   type: string
   displayName: 'Name of the target subscription (only used on "subscription" deployment level)'
@@ -10,7 +13,7 @@ parameters:
   type: string
   default: ''  
   displayName: 'Management Group ID. (only used on "managementGroup" deployment level)'
-- name: 'resourceLocation'
+- name: 'azureDeploymentDataLocation'
   type: string
   default: ''
   displayName: 'Location for the resources in Azure'
@@ -66,23 +69,19 @@ steps:
     deploymentLevel: '${{ parameters.deploymentLevel }}'
     outputVariableNamePrefix: '${{ parameters.outputVariableNamePrefix }}'
     parameterOverrides: '${{ parameters.parameterOverrides }}'
-    resourceLocation: '${{ parameters.resourceLocation }}'
+    azureDeploymentDataLocation: '${{ parameters.azureDeploymentDataLocation }}'
     resourceGroupName: '${{ parameters.resourceGroupName }}'
     templateFile: '${{ parameters.templateFile }}'
     templateParameterFile: '${{ parameters.templateParameterFile }}'
     showExpectedChanges: '${{ parameters.showExpectedChanges }}'
     managementGroupId: '${{ parameters.managementGroupId }}'
+    subscription: '${{ parameters.subscription }}'
   inputs:
     failOnStandardError: true
-    azureSubscription: '${{ parameters.subscription }}'
+    azureSubscription: '${{ parameters.azureServiceConnectionName }}'
     scriptType: bash
     scriptLocation: inlineScript
     inlineScript: |    
-
-      #Azure Account
-
-      echo az account show
-
       # Ensure Azure CLI is up to date. May generate warning, can be ignored
       echo '##[section]Ensure Azure CLI is up to date'
       exec 3>&2
@@ -107,19 +106,19 @@ steps:
       fi
       {
         if [ $deploymentLevel == 'tenant' ]; then
-          cmd="az deployment tenant create --location \"$resourceLocation\""
+          cmd="az deployment tenant create --location \"$azureDeploymentDataLocation\""
           outputsCmd="az deployment tenant show"
         elif [ $deploymentLevel == 'managementGroup' ]; then
-          cmd="az deployment mg create --management-group-id \"$managementGroupId\" --location \"$resourceLocation\""
+          cmd="az deployment mg create --management-group-id \"$managementGroupId\" --location \"$azureDeploymentDataLocation\""
           outputsCmd="az deployment mg show --management-group-id \"$managementGroupId\""
         elif [ $deploymentLevel == 'subscription' ]; then
-          cmd="az deployment sub create --location \"$resourceLocation\""
+          cmd="az deployment sub create --subscription \"$subscription\" --location \"$azureDeploymentDataLocation\""
           outputsCmd="az deployment sub show"
         elif [ $deploymentLevel == 'resourceGroup' ]; then 
-          cmd="az deployment group create --mode \"$deploymentMode\" --resource-group \"$resourceGroupName\""
+          cmd="az deployment group create --subscription \"$subscription\" --resource-group \"$resourceGroupName\" --mode \"$deploymentMode\""
           outputsCmd="az deployment group show --resource-group \"$resourceGroupName\""
         fi
-        cmd="$cmd --name \"$deploymentName\" --template-file \"$templateFile\" $params"
+        cmd="$cmd --name \"$deploymentName\" --template-file \"$templateFile\"$params"
         outputsCmd="$outputsCmd --name \"$deploymentName\" --query properties.outputs"
         echo "##[command]$cmd"
         if [[ "${showExpectedChanges,,}" == "true" ]]; then 

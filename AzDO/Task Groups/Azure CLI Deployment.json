@@ -10,11 +10,11 @@
 			"timeoutInMinutes": 0,
 			"retryCountOnTaskFailure": 0,
 			"inputs": {
-				"connectedServiceNameARM": "$(subscription)",
+				"connectedServiceNameARM": "$(azureServiceConnectionName)",
 				"scriptType": "bash",
 				"scriptLocation": "inlineScript",
 				"scriptPath": "",
-				"inlineScript": "deploymentName='$(deploymentName)'\ndeploymentMode='$(deploymentMode)'\ndeploymentLevel='$(deploymentLevel)'\noutputVariableNamePrefix='$(outputVariableNamePrefix)'\nparameterOverrides=$'$(parameterOverrides)'\nresourceLocation='$(resourceLocation)'\nresourceGroupName='$(resourceGroupName)'\ntemplateFile='$(templateFile)'\ntemplateParameterFile='$(templateParameterFile)'\nshowExpectedChanges=$(showExpectedChanges)\nmanagementGroupId='$(managementGroupId)'\n\n# Ensure Azure CLI is up to date. May generate warning, can be ignored\necho '##[section]Ensure Azure CLI is up to date'\nexec 3>&2\nexec 2> /dev/null\naz bicep upgrade\nexec 2>&3\n\n# Path sanitizing for Linux\ntemplateFile=\"${templateFile//\\\\//}\"\ntemplateParameterFile=\"${templateParameterFile//\\\\//}\"\n\nif [ \"$deploymentName\" == \"\" ]; then \n  deploymentName=\"$(date +%Y%m%d-%H%M%S)-deployment\"\nfi\n\nparams=\"\"\nif [ \"$parameterOverrides\" != \"\" ]; then \n  params+=$\" --parameters $parameterOverrides\"\nfi\nif [ \"$templateParameterFile\" != \"\" ]; then \n  params+=\" --parameters \\\"$templateParameterFile\\\"\"\nfi\n{\n  if [ $deploymentLevel == 'tenant' ]; then\n    cmd=\"az deployment tenant create --location \\\"$resourceLocation\\\"\"\n    outputsCmd=\"az deployment tenant show\"\n  elif [ $deploymentLevel == 'managementGroup' ]; then\n    cmd=\"az deployment mg create --management-group-id \\\"$managementGroupId\\\" --location \\\"$resourceLocation\\\"\"\n    outputsCmd=\"az deployment mg show --management-group-id \\\"$managementGroupId\\\"\"\n  elif [ $deploymentLevel == 'subscription' ]; then\n    cmd=\"az deployment sub create --location \\\"$resourceLocation\\\"\"\n    outputsCmd=\"az deployment sub show\"\n  elif [ $deploymentLevel == 'resourceGroup' ]; then \n    cmd=\"az deployment group create --mode \\\"$deploymentMode\\\" --resource-group \\\"$resourceGroupName\\\"\"\n    outputsCmd=\"az deployment group show --resource-group \\\"$resourceGroupName\\\"\"\n  fi\n  cmd=\"$cmd --name \\\"$deploymentName\\\" --template-file \\\"$templateFile\\\" $params\"\n  outputsCmd=\"$outputsCmd --name \\\"$deploymentName\\\" --query properties.outputs\"\n  echo \"##[command]$cmd\"\n  if [[ \"${showExpectedChanges,,}\" == \"true\" ]]; then \n    echo '##[section]Template: expected changes'\n    eval \"$cmd --what-if -w\"\n  fi\n  echo '##[section]Template: deployment'\n  eval \"$cmd\"\n  deploymentoutputs=$(eval \"$outputsCmd\")\n} && {\n  echo '##[section]Convert outputs to variables'\n  echo $deploymentoutputs | jq -c '. | to_entries[] | [.key, .value.value, .value.type]' |\n    while IFS=$\"\\n\" read -r c; do\n      keyname=$(echo \"$c\" | jq -r '.[0]')\n      value=$(echo \"$c\" | jq -r '.[1]')\n      type=$(echo \"$c\" | jq -r '.[2]')\n      \n      if [ \"$type\" == \"SecureString\" ]; then\n        echo \"##vso[task.setvariable variable=$outputVariableNamePrefix$keyname;issecret=true]$value\"\n        echo \"Added variable '$outputVariableNamePrefix$keyname' ('$type') with secret value '******'\"\n      elif [ \"$type\" == \"String\" ]; then \n        echo \"##vso[task.setvariable variable=$outputVariableNamePrefix$keyname]$value\"\n        echo \"Added variable '$outputVariableNamePrefix$keyname' ('$type') with value '$value'\"\n      else \n        echo \"##[warning]Skipped output variable conversion: Type '$type' is not supported for '$keyname'\"\n      fi\n      \n    done    \n}",
+				"inlineScript": "deploymentName='$(deploymentName)'\ndeploymentMode='$(deploymentMode)'\ndeploymentLevel='$(deploymentLevel)'\noutputVariableNamePrefix='$(outputVariableNamePrefix)'\nparameterOverrides='$(parameterOverrides)'\nazureDeploymentDataLocation='$(azureDeploymentDataLocation)'\nresourceGroupName='$(resourceGroupName)'\ntemplateFile='$(templateFile)'\ntemplateParameterFile='$(templateParameterFile)'\nshowExpectedChanges='$(showExpectedChanges)'\nmanagementGroupId='$(managementGroupId)'\nsubscription='$(subscription)'\n\n# Ensure Azure CLI is up to date. May generate warning, can be ignored\necho '##[section]Ensure Azure CLI is up to date'\nexec 3>&2\nexec 2> /dev/null\naz bicep upgrade\nexec 2>&3\n\n# Path sanitizing for Linux\ntemplateFile=\"${templateFile//\\\\//}\"\ntemplateParameterFile=\"${templateParameterFile//\\\\//}\"\n\nif [ \"$deploymentName\" == \"\" ]; then \n  deploymentName=\"$(date +%Y%m%d-%H%M%S)-deployment\"\nfi\n\nparams=\"\"\nif [ \"$parameterOverrides\" != \"\" ]; then \n  params+=$\" --parameters $parameterOverrides\"\nfi\nif [ \"$templateParameterFile\" != \"\" ]; then \n  params+=\" --parameters \\\"$templateParameterFile\\\"\"\nfi\n{\n  if [ $deploymentLevel == 'tenant' ]; then\n    cmd=\"az deployment tenant create --location \\\"$azureDeploymentDataLocation\\\"\"\n    outputsCmd=\"az deployment tenant show\"\n  elif [ $deploymentLevel == 'managementGroup' ]; then\n    cmd=\"az deployment mg create --management-group-id \\\"$managementGroupId\\\" --location \\\"$azureDeploymentDataLocation\\\"\"\n    outputsCmd=\"az deployment mg show --management-group-id \\\"$managementGroupId\\\"\"\n  elif [ $deploymentLevel == 'subscription' ]; then\n    cmd=\"az deployment sub create --subscription \\\"$subscription\\\" --location \\\"$azureDeploymentDataLocation\\\"\"\n    outputsCmd=\"az deployment sub show\"\n  elif [ $deploymentLevel == 'resourceGroup' ]; then \n    cmd=\"az deployment group create --subscription \\\"$subscription\\\" --resource-group \\\"$resourceGroupName\\\" --mode \\\"$deploymentMode\\\"\"\n    outputsCmd=\"az deployment group show --resource-group \\\"$resourceGroupName\\\"\"\n  fi\n  cmd=\"$cmd --name \\\"$deploymentName\\\" --template-file \\\"$templateFile\\\"$params\"\n  outputsCmd=\"$outputsCmd --name \\\"$deploymentName\\\" --query properties.outputs\"\n  echo \"##[command]$cmd\"\n  if [[ \"${showExpectedChanges,,}\" == \"true\" ]]; then \n    echo '##[section]Template: expected changes'\n    eval \"$cmd --what-if -w\"\n  fi\n  echo '##[section]Template: deployment'\n  eval \"$cmd\"\n  deploymentoutputs=$(eval \"$outputsCmd\")\n} && {\n  echo '##[section]Convert outputs to variables'\n  echo $deploymentoutputs | jq -c '. | to_entries[] | [.key, .value.value, .value.type]' |\n    while IFS=$\"\\n\" read -r c; do\n      keyname=$(echo \"$c\" | jq -r '.[0]')\n      value=$(echo \"$c\" | jq -r '.[1]')\n      type=$(echo \"$c\" | jq -r '.[2]')\n      \n      if [ \"$type\" == \"SecureString\" ]; then\n        echo \"##vso[task.setvariable variable=$outputVariableNamePrefix$keyname;issecret=true]$value\"\n        echo \"Added variable '$outputVariableNamePrefix$keyname' ('$type') with secret value '******'\"\n      elif [ \"$type\" == \"String\" ]; then \n        echo \"##vso[task.setvariable variable=$outputVariableNamePrefix$keyname]$value\"\n        echo \"Added variable '$outputVariableNamePrefix$keyname' ('$type') with value '$value'\"\n      else \n        echo \"##[warning]Skipped output variable conversion: Type '$type' is not supported for '$keyname'\"\n      fi\n      \n    done    \n} ",
 				"scriptArguments": "",
 				"powerShellErrorActionPreference": "stop",
 				"addSpnToEnvironment": "false",
@@ -73,6 +73,18 @@
 			"defaultValue": "Azure CLI - Deployment to Azure",
 			"type": "string",
 			"helpMarkDown": "Display name for the tasks",
+			"groupName": ""
+		},
+    {
+			"aliases": [],
+			"options": {},
+			"properties": {},
+			"name": "subscription",
+			"label": "Subscription",
+      "defaultValue": "$(subscription)",
+			"type": "string",
+			"helpMarkDown": "Name of the target subscription",
+      "required": true,
 			"groupName": ""
 		},
 		{
@@ -144,6 +156,19 @@
 			"helpMarkDown": "key1=value1 key2=value2",
 			"groupName": ""
 		},
+    {
+			"aliases": [],
+			"options": {},
+			"properties": {},
+			"name": "managementGroupId",
+			"label": "ManagementGroup ID",
+			"defaultValue": "$(managementGroupId)",
+			"required": true,
+			"type": "string",
+			"helpMarkDown": "ID of the Azure Managementgroup to use",
+			"visibleRule": "deploymentLevel = managementGroup",
+			"groupName": ""
+		},
 		{
 			"aliases": [],
 			"options": {},
@@ -161,12 +186,12 @@
 			"aliases": [],
 			"options": {},
 			"properties": {},
-			"name": "resourceLocation",
-			"label": "Resource location",
-			"defaultValue": "",
+			"name": "azureDeploymentDataLocation",
+			"label": "Deployment data location",
+			"defaultValue": "$(azureDeploymentDataLocation)",
 			"required": true,
 			"type": "string",
-			"helpMarkDown": "Azure location of the resources",
+			"helpMarkDown": "For non-resourcegroup level deployments: location for the deployment data",
 			"visibleRule": "deploymentLevel != resourceGroup",
 			"groupName": ""
 		},
@@ -176,9 +201,9 @@
 			"properties": {
 				"endpointFilterRule": ""
 			},
-			"name": "subscription",
-			"label": "Subscription",
-			"defaultValue": "$(subscription)",
+			"name": "azureServiceConnectionName",
+			"label": "ARM Service Connection",
+			"defaultValue": "$(azureServiceConnectionName)",
 			"required": true,
 			"type": "connectedService:AzureRM",
 			"helpMarkDown": "Select an Azure Resource Manager service connection for the deployment",
