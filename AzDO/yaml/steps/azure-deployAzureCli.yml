@@ -78,6 +78,11 @@ steps:
     scriptType: bash
     scriptLocation: inlineScript
     inlineScript: |    
+
+      #Azure Account
+
+      echo az account show
+
       # Ensure Azure CLI is up to date. May generate warning, can be ignored
       echo '##[section]Ensure Azure CLI is up to date'
       exec 3>&2
